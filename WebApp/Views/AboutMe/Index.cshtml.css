@@ -1,0 +1,56 @@
+﻿.wrapper {
+    min-height: 100vh;
+}
+
+.heading {
+    margin: 120px 0 64px 0;
+    text-align: center;
+    font-family: $font-stack !important;
+    font-weight: 300;
+}
+
+
+
+.cta {
+    font-family: $font-stack !important;
+    font-weight: 300;
+}
+
+.aboutText {
+    font-size: 2rem;
+    font-family: $font-stack !important;
+    font-weight: 300;
+}
+
+@media only screen and (max-width: 992px) {
+    .aboutText {
+        text-align: center;
+        font-weight: 400 !important;
+        font-size: 1.75rem;
+        padding: 0 32px;
+        margin: 0;
+    }
+
+    .profileImg {
+        padding: 0 32px;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .wrapper {
+        min-height: 75vh;
+    }
+
+    .profileImg {
+        width: 100%;
+    }
+
+    .aboutText {
+        font-size: 1.25rem;
+    }
+}
+.profileImg {
+    width: 75%;
+}
+
+

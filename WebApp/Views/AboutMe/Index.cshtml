@@ -1,0 +1,61 @@
+﻿@{
+ViewData["Title"] = "About Me";
+    Layout = "_Layout";
+}
+<div class="wrapper container">
+    <h1 class="heading">About</h1>
+    <div class="row">
+        <div class="col-lg-6 d-flex justify-content-center mb-3">
+            <img src="~/assets/ntlinh/about.jpg" style="width: 75%" class="profileImg" />
+            
+        </div>
+        <div class="col-lg-6 d-flex flex-column justify-content-center">
+            <div>
+                <p class="aboutText">Hi, I'm Linh.</p>
+                <p class="aboutText">
+                    I'm a videographer based in Hanoi.
+                </p>
+            </div>
+            <div class="d-flex flex-lg-row flex-column mx-auto mx-lg-0 mt-5">
+                <h4 class="cta">Connect with me</h4>
+                <div class="ps-3 d-flex justify-content-center align-items-center">
+                    <div class="px-2">
+                        <a href="https://www.facebook.com/ltnguyen198">
+                            <img src="~/assets/footer-icon-link/2021_Facebook_icon.svg.png" alt="" style=" width: 32px" />
+                        </a>
+                    </div>
+                    <div class="px-2">
+                        <a href="https://www.youtube.com/channel/UCZVfd9rhMUgZT9V6nBsfabw">
+                            <img src="~/assets/footer-icon-link/youtube-logo.webp" alt="" style="width: 32px" />
+                        </a>
+                    </div>
+                    <div class="px-2" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <span>
+                            <img src="~/assets/footer-icon-link/Icon_of_Zalo.svg.webp" alt="" style=" width: 32px" />
+                        </span>
+                    </div>
+                    <div class="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="exampleModalLabel">
+                                        Connect with me
+                                    </h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="~/assets/ntlinh/zalo-qr.jpg" alt="" style="width: 100% " />
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        Đóng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
