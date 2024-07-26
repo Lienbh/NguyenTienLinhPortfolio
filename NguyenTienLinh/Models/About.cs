@@ -12,5 +12,7 @@ public partial class About
     [Key]
     public int IdAbout { get; set; }
 
-    public string AboutImage { get; set; } = null!;
+    [Required]
+    public string AboutImage { get; set; }
+ 
 }

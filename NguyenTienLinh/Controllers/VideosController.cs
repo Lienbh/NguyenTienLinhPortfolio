@@ -58,14 +58,14 @@ namespace nguyentienlink_api.Controllers
 
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Video video)
+        public IActionResult Put(int id, [FromBody] Videos video)
         {
             var entity = _context.Videos.Find(id);
             if (entity == null)
             {
                 return NotFound();
             }
-            entity.STT = video.Stt;
+            entity.STT = video.STT;
             entity.VideoLinks = video.VideoLinks;
             entity.Title = video.Title;
             entity.IdCategories = video.IdCategories;

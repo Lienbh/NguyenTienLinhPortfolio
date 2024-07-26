@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
+using NguyenTienLinh.DTOS;
 using NguyenTienLinh.Models;
 using nguyentienlink_api.Controllers;
 
@@ -22,39 +23,28 @@ namespace NguyenTienLinh.Controllers
         {
             return _context.BackGround.ToList();
         }
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
+
+    
+    [HttpGet("{id}")]
+    public IActionResult Get( int id)
+    {
+        var backgroud = _context.BackGround.Find(id);
+        if (backgroud == null)
         {
-            var backgroud = _context.BackGround.Find(id);
-            if (backgroud == null)
-            {
-                return NotFound();
-            }
-            return Ok(backgroud);
+            return NotFound();
         }
+        return Ok(backgroud);
+    }
+
         [HttpPost]
-
-        public IActionResult Post([FromBody] BackGround backgroud, string path)
+        public IActionResult Post([FromBody] BackGroudDTO backgroud)
         {
-
-            backgroud = new BackGround();
-
-            Xulyanh xl = new Xulyanh();
-
-
-
-            backgroud.Image = xl.Xuly(path);
-
-
-
-
-
-
-
             // Post byte[] to database
             if (ModelState.IsValid)
             {
-                _context.BackGround.Add(backgroud);
+                BackGround backGroundCreate = new BackGround();
+                backGroundCreate.Image = backgroud.Image;
+                _context.BackGround.Add(backGroundCreate);
                 _context.SaveChanges();
                 return Ok();
             }
@@ -63,7 +53,7 @@ namespace NguyenTienLinh.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] BackGround backgroud)
+        public IActionResult Put(int id, [FromBody] BackGroudDTO backgroud)
         {
             var entity = _context.BackGround.Find(id);
             if (entity == null)
@@ -71,12 +61,13 @@ namespace NguyenTienLinh.Controllers
                 return NotFound();
             }
             entity.Image = backgroud.Image;
+            _context.BackGround.Update(entity);
             _context.SaveChanges();
             return Ok();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int? id)
         {
             var backgroud = _context.BackGround.Find(id);
             if (backgroud == null)

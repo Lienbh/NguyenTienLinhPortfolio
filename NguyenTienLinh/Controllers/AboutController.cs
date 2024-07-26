@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
+using NguyenTienLinh.DTOS;
 using NguyenTienLinh.Models;
 using nguyentienlink_api.Controllers;
 
@@ -25,6 +26,7 @@ namespace NguyenTienLinh.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
+            
             var about = _context.About.Find(id);
             if (about == null)
             {
@@ -32,16 +34,33 @@ namespace NguyenTienLinh.Controllers
             }
             return Ok(about);
         }
+
+        [HttpGet("get-by-aboutImage/{aboutImage}")]
+
+        public IActionResult Get(string aboutImage)
+        {
+
+            var about = _context.About.Where(c => c.AboutImage.StartsWith(aboutImage)).ToList();
+            var aboutF = _context.About.FirstOrDefault(c => c.AboutImage.Contains(aboutImage));
+            if (about == null)
+            {
+                return NotFound();
+            }
+            return Ok(about);
+        }
+
         //Tôi muốn tạo mới 1 đối tượng About
         [HttpPost()]
-        public IActionResult Post([FromBody] About about,string path)
+        public IActionResult Post([FromBody] AboutDTO about)
         {
-            about = new About();
-            Xulyanh xl = new Xulyanh();
-            about.AboutImage = xl.Xuly(path);
+          
+            //Xulyanh xl = new Xulyanh();
+            //about.AboutImage = xl.Xuly(about.Path);
             if (ModelState.IsValid)
             {
-                _context.About.Add(about);
+                About aboutCreate = new About();
+                aboutCreate.AboutImage= about.AboutImage;
+                _context.About.Add(aboutCreate);
                 _context.SaveChanges();
                 return Ok();
             }
@@ -50,14 +69,13 @@ namespace NguyenTienLinh.Controllers
         }
        
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] About about)
+        public IActionResult Put(int id, [FromBody] AboutDTO about)
         {
             var entity = _context.About.Find(id);
             if (entity == null)
             {
                 return NotFound();
             }
-            entity.IdAbout = about.IdAbout;
             entity.AboutImage = about.AboutImage;
             _context.About.Update(entity);
             _context.SaveChanges();

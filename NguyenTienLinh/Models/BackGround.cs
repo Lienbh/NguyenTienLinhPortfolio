@@ -11,7 +11,8 @@ public partial class BackGround
 {
     [Key]
     public int IdBackGround { get; set; }
+    [Required]
+    public string Image { get; set; }
 
-    public string Image { get; set; } = null!;
 }
  

@@ -48,7 +48,7 @@ namespace nguyentienlink_api.Controllers
         }
         
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Category category)
+        public IActionResult Put(int id, [FromBody] Categories  category)
         {
             var entity = _context.Categories.Find(id);
             if (entity == null)
