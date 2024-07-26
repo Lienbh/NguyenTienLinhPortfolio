@@ -18,6 +18,7 @@ namespace NguyenTienLinh.Controllers
             logger = _logger;
             _context = new AppDbContext();
         }
+
         [HttpGet(Name = "AboutController")]
         public IEnumerable<About> Get()
         {
