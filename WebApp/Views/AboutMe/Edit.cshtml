@@ -1,0 +1,86 @@
+﻿@model BuildingBlock.DTOS.AboutDTO;
+
+@{
+	ViewData["Title"] = "Cập nhật thông tin";
+	Layout = "_Layout";
+}
+@if (TempData["responseMessage"] != null)
+{
+	<div class="alert alert-success">
+		@TempData["responseMessage"]
+	</div>
+}
+<h4>Cập nhật thông tin</h4>
+<hr />
+<div class="row" id="modelContainer">
+	<div class="col-lg-8 offset-2 ">
+		<div class="row">
+			<div class="col-md-6 d-flex justify-content-lg-start">
+				<form asp-action="UpdateAbout" enctype="multipart/form-data">
+					<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+					<div class="form-group">
+						<label asp-for="IdAbout" hidden class="control-label"></label>
+						<input asp-for="IdAbout"  hidden class="form-control" />
+						<span asp-validation-for="IdAbout" class="text-danger"></span>
+					</div>
+					<div class="form-group">
+						<label class="control-label">Đường dẫn</label>
+						<input name="photo" type="file" id="fileInput" class="form-control" />
+
+					</div>
+					<div class="form-group mt-2">
+						<input type="submit" value="Cập nhật" class="btn btn-primary btn-edit" />
+					</div>
+				</form>
+			</div>
+			<div class="col-md-6 text-center">
+				@Html.Partial("_EditPartialView", Model)
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+<div>
+	<button type="button" class="btn btn-outline-info" asp-action="Index">Quay lại</button>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+	$(document).ready(function () {
+		$('#fileInput').on('change', function (event) {
+		 // Prevent the default button action
+
+			// Create a FormData object to send the file data
+			var formData = new FormData();
+
+			// Append the file to FormData
+			var file = $('#fileInput')[0].files[0];
+			if (file) {
+				formData.append('photo', file);
+			}
+
+			// Make the AJAX request
+			$.ajax({
+				url: '@Url.Action("HandleFileChange", "AboutMe")', // Adjust controller and action as needed
+				type: 'POST',
+				data: formData,
+				processData: false, // Tell jQuery not to process the data
+				contentType: false, // Tell jQuery not to set content type
+				success: function (response) {
+				
+				},
+				error: function (xhr, status, error) {
+				
+				}
+			});
+		});
+	});
+</script>
+
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+
+}
+

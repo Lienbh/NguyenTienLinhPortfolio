@@ -1,6 +1,10 @@
-﻿@{
+﻿@model IEnumerable<BuildingBlock.DTOS.CategoriesDTO>;
+
+@{
 ViewData["Title"] = "My Work";
     Layout = "_Layout";
+    var userName = (string)TempData["currentUser"];
+
 }
 <div class="carouselWrap">
     <div class="myWorktitle">
@@ -8,84 +12,74 @@ ViewData["Title"] = "My Work";
     </div>
 
     <div class="container">
-        <div class="row mt-5">
-            <div class="col-lg-2 col-3">
-                <h1 class="title">
-                    <span class="textDeco">
-                        Commercial
+        
+            @foreach (var item in Model)
+            {
+            <div class="row mt-5">
+                <div class="col-lg-2 col-3">
+                    
+                    <h1 class="title">
+                        <span class="textDeco redirecter" data-param="@item.IdCategories">
+                            @item.CategoryName
+                        </span>
+                        @if (!string.IsNullOrEmpty(userName))
+                        {
+                            <div class="textDeco-child   mt-3 text-center" data-param="@item.IdCategories">
+                                Manage Videos
+                            </div>
+                        }
+                    </h1>
+                </div>
+                <div class="col-lg-10 col-9 redirecter" data-param="@item.IdCategories">
+                    <span>
+                        <img src="assets/projects/@item.BrandingImage" class="imgFadeIn" />
                     </span>
-                    <div class="textDeco">Products</div>
-                </h1>
+                </div>
             </div>
-            <div class="col-lg-10 col-9 imgWrap">
-                <span>
-                    <img src="assets/projects/commercail.png" class="imgFadeIn" />
-                </span>
-            </div>
-        </div>
+            }
+       
 
-        <div class="row mt-5">
-            <div class="col-lg-2 col-3">
-                <h1 class="title">
-                    <span  class="textDeco">
-                        Wedding
-                    </span>
-                    <div class="textDeco">Films</div>
-                </h1>
-            </div>
-            <div class="col-lg-10 col-9 imgWrap">
-                <span >
-                    <img src="assets/projects/wedding.png" class="imgFadeIn" />
-                </span>
-            </div>
-        </div>
-
-        <div class="row mt-5">
-            <div class="col-lg-2 col-3">
-                <h1 class="title">
-                    <span  class="textDeco">
-                        Events
-                    </span>
-                </h1>
-            </div>
-            <div class="col-lg-10 col-9 imgWrap">
-                <span >
-                    <img src="assets/projects/event.png" class="imgFadeIn" />
-                </span>
-            </div>
-        </div>
-
-        <div class="row mt-5">
-            <div class="col-lg-2 col-3">
-                <h1 class="title">
-                    <span  class="textDeco">
-                        Interviews
-                    </span>
-                    <span  div="textDeco">
-                        Podcasts
-                    </span>
-                </h1>
-            </div>
-            <div class="col-lg-10 col-9 imgWrap">
-                <span >
-                    <img src="assets/projects/interview.png" class="imgFadeIn" />
-                </span>
-            </div>
-        </div>
-
-        <div class="row mt-5">
-            <div class="col-lg-2 col-3">
-                <h1 class="title">
-                    <span  class="textDeco">
-                        Lifestyle
-                    </span>
-                </h1>
-            </div>
-            <div class="col-lg-10 col-9 imgWrap">
-                <span >
-                    <img src="assets/projects/lifestyle.png" class="imgFadeIn" />
-                </span>
-            </div>
-        </div>
     </div>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+        $(document).ready(function() {
+        $('.redirecter').click(function (event) {
+                event.preventDefault(); // Prevent the default link behavior
+
+                // Get parameters from data attributes
+                var paramId = $(this).data('param');
+           
+
+                $.ajax({
+                    type: "POST",
+                url: '@Url.Action("RedirectMyWorkPartialView", "MyWork")',
+                data: { id: paramId },
+                    success: function(response) {
+                    window.location.href = response.redirectToUrl + '/' + paramId;
+
+                    },
+                    error: function() {
+                        alert('Error occurred while calling the method.');
+                    }
+                });
+            });
+        });
+        $('.textDeco-child').click(function (event) {
+        event.preventDefault(); // Prevent the default link behavior
+        // Get parameters from data attributes
+        var paramId = $(this).data('param');
+        var urlRedirect = "/Mywork/Manage?categoriesId=" + paramId;
+        $.ajax({
+            type: "GET",
+            url: urlRedirect,
+            data: { id: paramId },
+            success: function (response) {
+                window.location.href = urlRedirect;
+            },
+            error: function () {
+                alert('Error occurred while calling the method.');
+            }
+        });
+    });
+    </script>

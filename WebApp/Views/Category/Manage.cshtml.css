@@ -1,0 +1,95 @@
+﻿.carouselWrap {
+    .displayLogo{
+        width: 30%;
+        position: absolute;
+        top: 50;
+        right: 0;
+        transform: translateY(50%);
+        margin-right: 80px;
+    }
+
+}
+@media (max-width: 768px) {
+    .displayLogo {
+        display: none;
+    }
+}
+.viewH{
+    min-height: 100vh;
+}
+.imgFadeIn {
+    width: 100%;
+    transition: 0.5s all ease-in-out;
+}
+.imgWrap:hover img {
+    transform: scale(1.05);
+}
+
+.textDeco {
+    text-decoration: none;
+    color: #000;
+    background: linear-gradient(0deg, slateblue, slateblue) no-repeat right bottom /
+    0 var(--bg-h);
+    transition: background-size 350ms;
+    --bg-h: 100%;
+    padding-bottom: 2px;
+    --bg-h: 2px;
+    color: inherit;
+    line-height: 1;
+}
+.textDeco:where(:hover, :focus-visible) {
+    background-size: 100% var(--bg-h);
+    background-position-x: left;
+}
+
+.weddingTitle,
+.myWorktitle h1 {
+    margin-top: 120px;
+    font-family: $font-stack;
+    font-weight: 300 !important;
+}
+.logoWidth {
+    width: 40px;
+}
+.weddingTitle {
+    text-align: center;
+}
+
+
+@media (min-width: 768px) and (max-width: 1200px) {
+    .title {
+        font-size: 2rem !important;
+    }
+}
+@media (max-width: 768px) {
+    .title {
+        font-size: 1.5rem !important;
+    }
+}
+@media (max-width: 576px) {
+    .title {
+        font-size: 1.25rem !important;
+    }
+}
+@media (max-width: 478px) {
+    .title {
+        font-size: 1rem !important;
+    }
+}
+@media (max-width: 375px) {
+    .title {
+        font-size: 0.8rem !important;
+    }
+}
+.modelContainer {
+    margin-top:60px !important;
+}
+.myWorktitle h1 {
+    margin-top: 120px;
+    font-family: $font-stack;
+    font-weight: 300 !important;
+}
+
+.cate-img {
+    width:100%;
+}

@@ -50,6 +50,9 @@ namespace NguyenTienLinh.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("TimeInterval")
+                        .HasColumnType("int");
+
                     b.HasKey("IdBackGround");
 
                     b.ToTable("BackGround");
@@ -62,6 +65,10 @@ namespace NguyenTienLinh.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCategories"));
+
+                    b.Property<string>("BrandingImage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
@@ -101,9 +108,6 @@ namespace NguyenTienLinh.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdVideo"));
 
-                    b.Property<int>("CategoriesIdCategories")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdCategories")
                         .HasColumnType("int");
 
@@ -120,7 +124,7 @@ namespace NguyenTienLinh.Migrations
 
                     b.HasKey("IdVideo");
 
-                    b.HasIndex("CategoriesIdCategories");
+                    b.HasIndex("IdCategories");
 
                     b.ToTable("Videos");
                 });
@@ -129,7 +133,7 @@ namespace NguyenTienLinh.Migrations
                 {
                     b.HasOne("NguyenTienLinh.Models.Categories", "Categories")
                         .WithMany("Videos")
-                        .HasForeignKey("CategoriesIdCategories")
+                        .HasForeignKey("IdCategories")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

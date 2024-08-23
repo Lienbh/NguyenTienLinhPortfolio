@@ -15,7 +15,7 @@ namespace NguyenTienLinh.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-A9Q63JRK\\SQLEXPRESS;Database=ProfileDatabase;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("Server=LAPTOP-A9Q63JRK\\SQLEXPRESS;Database=ProfileDatabase;Trusted_Connection=True;TrustServerCertificate=True;Connection Timeout=120;");
         }
 
         public DbSet<Videos> Videos { get; set; }

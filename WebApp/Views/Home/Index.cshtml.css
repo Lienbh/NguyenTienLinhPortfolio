@@ -1,13 +1,29 @@
 ﻿.carouselWrap {
-    .displayLogo{
-        width: 30%;
-        position: absolute;
-        top: 50;
-        right: 0;
-        transform: translateY(50%);
-        margin-right: 80px;
-    }
 
+}
+
+.rl {
+    position: relative;
+}
+.btn-warping {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: #555;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    opacity: 0;
+    visibility: hidden;
+}
+.shower:hover .btn-warping {
+    opacity: 1;
+    visibility: visible;
 }
 @media (max-width: 768px) {
     .displayLogo {
@@ -28,6 +44,24 @@
 .textDeco {
     text-decoration: none;
     color: #000;
+    cursor: pointer;
+    background: linear-gradient(0deg, slateblue, slateblue) no-repeat right bottom / 0 var(--bg-h);
+    transition: background-size 350ms;
+    --bg-h: 100%;
+    padding-bottom: 2px;
+    --bg-h: 2px;
+    color: inherit;
+    line-height: 1;
+}
+.textDeco:where(:hover, :focus-visible) {
+    background-size: 100% var(--bg-h);
+    background-position-x: left;
+}
+.textDeco-child {
+    text-decoration: none;
+    color: #000;
+    font-size:14px;
+    cursor:pointer;
     background: linear-gradient(0deg, slateblue, slateblue) no-repeat right bottom /
     0 var(--bg-h);
     transition: background-size 350ms;
@@ -37,7 +71,7 @@
     color: inherit;
     line-height: 1;
 }
-.textDeco:where(:hover, :focus-visible) {
+.textDeco-child:where(:hover, :focus-visible) {
     background-size: 100% var(--bg-h);
     background-position-x: left;
 }

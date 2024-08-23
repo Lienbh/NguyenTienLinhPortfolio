@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BuildingBlock.DTOS;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
 using NguyenTienLinh.Models;
@@ -37,20 +37,43 @@ namespace nguyentienlink_api.Controllers
             return Ok(user);
         }
         [HttpPost]
-        public IActionResult Post([FromBody] User user,string Username,string password)
+        public IActionResult CreateUser([FromBody] UserDTO user)
         {
             if (ModelState.IsValid)
             {
-                _context.User.Add(user);
+                User userCreate = new User();
+                userCreate.UserName = user.UserName;
+                userCreate.Password = user.Password;
+                _context.User.Add(userCreate);
                 _context.SaveChanges();
                 return Ok();
             }
             return BadRequest();
-        }                   
+        }
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserDTO user)
+        {
+
+            if (ModelState.IsValid)
+            {
+                var checkUser = _context.User.FirstOrDefault(x => x.UserName == user.UserName && x.Password == user.Password);
+                if (checkUser == null)
+                {
+                    return NotFound("Thông tin tài khoản hoặc mật khẩu không chính xác");
+                }
+                else
+                {
+                    return Ok("Đăng nhập thành công");
+                }
+
+
+            }
+            return Content("Đăng nhập thất bại");
+        }
 
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] User user)
+        public IActionResult Put(int id, [FromBody] UserDTO user)
         {
             var entity = _context.User.Find(id);
             if (entity == null)
@@ -58,12 +81,13 @@ namespace nguyentienlink_api.Controllers
                 return NotFound();
             }
             entity.UserName = user.UserName;
-            
+
             entity.Password = user.Password;
+            _context.User.Update(entity);
             _context.SaveChanges();
             return Ok();
         }
-       
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
@@ -76,6 +100,6 @@ namespace nguyentienlink_api.Controllers
             _context.SaveChanges();
             return Ok();
         }
-       
+
     }
 }

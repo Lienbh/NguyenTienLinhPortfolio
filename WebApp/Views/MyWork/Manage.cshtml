@@ -1,0 +1,219 @@
+﻿@model  BuildingBlock.DTOS.ManageVideoDTO
+@{
+    int indexer = 0;
+    ViewData["Title"] = "Manage";
+    Layout = "_Layout";
+}
+<div class="row modelContainer">
+    <div class="col-lg-8 offset-2">
+        <div class="row mt-3 mb-0">
+            <div class="col-lg-12 d-flex justify-content-end">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#create" data-param-idcate="@Model.IdCategories" class="btn btn-outline-primary">Thêm mới video </button>
+            </div>
+        </div>
+        <table class="table caption-top table-bordered table-responsive">
+            <caption>Danh sách video danh mục @Model.CategoriesName</caption>  
+    </div>
+    <thead>
+        <tr>
+            <th scope="col" style="width:2%">#</th>
+            <th scope="col" style="width:19%">Tiêu đề</th>
+            <th scope="col" style="width:10%">STT</th>
+            <th scope="col" style="width:50%">Link video</th>
+            <th scope="col" style="width:12%">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in @Model.Videos)
+        {
+            <tr>
+                <th scope="row">@(++indexer)</th>
+                <td>@item.Title</td>
+                <td>@item.STT</td>
+                <td>
+                    <iframe style="width:100%;height:300px;"
+                            src=@item.VideoLinks
+                            title=@item.Title
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen></iframe>
+                </td>
+                <td>
+                    <button type="button" data-param-stt="@item.STT" data-param-idcate="@Model.IdCategories" data-param-id="@item.IdVideo" data-param-title="@item.Title" data-param-iframe="@item.VideoLinks" data-bs-toggle="modal" data-bs-target="#update" class="btn btn-outline-warning">Sửa</button>
+                    <button type="button" data-param-idcate="@Model.IdCategories" class="btn btn-outline-danger" data-param-id="@item.IdVideo" data-bs-toggle="modal" data-bs-target="#delete">Xóa</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
+</div>
+</div>
+<div class="modal fade " id="update" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form asp-action="UpdateVideo" enctype="multipart/form-data" style="width:100%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Chỉnh video</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Tiêu đề: <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" class="form-control" required maxlength="250" id="Title-update">
+                    </div> 
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">STT: <span class="text-danger">*</span></label>
+                        <input type="number" name="STT" class="form-control" required  min="1" id="STT-update">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Link Video: <span class="text-danger">*</span></label>
+                        <input type="text" name="VideoLinks" class="form-control" required maxlength="250" id="VideoLinks-update">
+
+                        <iframe class="mt-2" id="VideoLinks-frame-update" style="width:100%;height:300px;"
+                                src=""
+                                title=""
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen></iframe>
+                    </div>
+                    <div>
+                        <input id="IdVideo-update" hidden name="IdVideo" class="form-control" />
+                        <input id="IdCategories-update" hidden name="IdCategories" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade " id="create" tabindex="-1" aria-labelledby="exampleModalLabelCreate" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <form asp-action="CreateVideo" enctype="multipart/form-data" style="width:100%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm mới video</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Tiêu đề: <span class="text-danger">*</span></label>
+                        <input type="text" name="Title" class="form-control" required maxlength="250" id="Title-create">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">STT: <span class="text-danger">*</span></label>
+                        <input type="number" name="STT" class="form-control" required min="0" id="STT-update">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Link video: <span class="text-danger">*</span></label>
+                        <input type="text" name="VideoLinks" class="form-control" required maxlength="250" id="VideoLinks-create">
+                        <iframe class="mt-2" id="VideoLinks-frame-create" style="width:100%;height:300px;"
+                                src=""
+                                title=""
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen></iframe>
+                    </div>
+                    <div>
+                        <input id="IdCategories-create" hidden name="IdCategories" class="form-control" />
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade " id="delete" tabindex="-1" aria-labelledby="exampleModalLabelCreate" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="DeleteVideo" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Xóa danh mục</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input hidden name="id" id="IdVideo_Delete" class="form-control" />
+                    <input hidden name="IdCategories"  id="IdCategories_Delete" class="form-control" />
+                    Bạn có chắc muốn xóa video này ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#update').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var valueTitle = button.data('param-title');
+            var valueIdCategories = button.data('param-idcate');
+            var valueIframe = button.data('param-iframe');
+            var id = button.data('param-id');
+            var stt = button.data('param-stt');
+            var modal = $(this);
+            console.log(id)
+            modal.find('.modal-body #Title-update').val(valueTitle);
+            $('#VideoLinks-frame-update').attr('src', valueIframe);
+            $('#VideoLinks-update').val(valueIframe);
+            $('#IdVideo-update').val(id);
+            $('#IdCategories-update').val(valueIdCategories);
+            $('#STT-update').val(stt);
+        });
+   
+        $('#delete').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('param-id');
+            var valueIdCategories = button.data('param-idcate');
+            var modal = $(this);
+            $('#IdVideo_Delete').val(id);
+            $('#IdCategories_Delete').val(valueIdCategories);
+        });
+
+        $('#create').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var valueTitle = button.data('param-title');
+            var valueIdCategories = button.data('param-idcate');
+            var valueIframe = button.data('param-iframe');
+            var id = button.data('param-id');
+            var stt = button.data('param-stt');
+
+            $('#STT-update').val(stt);
+
+            var modal = $(this);
+
+            modal.find('.modal-body #Title-create').val(valueTitle);
+            $('#VideoLinks-frame-create').attr('src', valueIframe);
+            $('#VideoLinks-create').val(valueIframe);
+            $('#IdCategories-create').val(valueIdCategories);
+
+        });
+
+        $('#VideoLinks-create').on('blur', function (event) {
+            var iframesrc = $('#VideoLinks-create').val();
+            var finalIframe = iframesrc.split('&')[0];
+            $('#VideoLinks-frame-create').attr('src', finalIframe.replace('/watch?v=', '/embed/'));
+            $('#VideoLinks-create').val(finalIframe.replace('/watch?v=', '/embed/'));
+        });
+        
+        $('#VideoLinks-update').on('blur', function (event) {
+            var iframesrc = $('#VideoLinks-update').val();
+            var finalIframe = iframesrc.split('&')[0];
+            $('#VideoLinks-update').val(finalIframe.replace('/watch?v=', '/embed/'));
+            $('#VideoLinks-frame-update').attr('src', finalIframe.replace('/watch?v=', '/embed/'));
+        });
+
+        
+    });
+</script>
+@section scripts {
+    <script type="text/javascript">
+        @Html.Raw(ViewBag.SweetAlertShowMessage)
+    </script>
+}

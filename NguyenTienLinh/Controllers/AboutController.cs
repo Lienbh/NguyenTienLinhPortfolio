@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BuildingBlock.DTOS;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
-using NguyenTienLinh.DTOS;
 using NguyenTienLinh.Models;
-using nguyentienlink_api.Controllers;
 
 namespace NguyenTienLinh.Controllers
 {
@@ -19,15 +17,22 @@ namespace NguyenTienLinh.Controllers
             _context = new AppDbContext();
         }
 
-        [HttpGet(Name = "AboutController")]
+        [HttpGet]
         public IEnumerable<About> Get()
         {
             return _context.About.ToList();
         }
+
+        [HttpGet("AboutProfile")]
+        public About GetAboutProfile()
+        {
+            var profile = _context.About.FirstOrDefault();
+            return profile != null ? profile : new About();
+        }
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            
+
             var about = _context.About.Find(id);
             if (about == null)
             {
@@ -54,13 +59,13 @@ namespace NguyenTienLinh.Controllers
         [HttpPost()]
         public IActionResult Post([FromBody] AboutDTO about)
         {
-          
+
             //Xulyanh xl = new Xulyanh();
             //about.AboutImage = xl.Xuly(about.Path);
             if (ModelState.IsValid)
             {
                 About aboutCreate = new About();
-                aboutCreate.AboutImage= about.AboutImage;
+                aboutCreate.AboutImage = about.AboutImage;
                 _context.About.Add(aboutCreate);
                 _context.SaveChanges();
                 return Ok();
@@ -68,7 +73,7 @@ namespace NguyenTienLinh.Controllers
             return BadRequest();
 
         }
-       
+
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] AboutDTO about)
         {
@@ -94,7 +99,7 @@ namespace NguyenTienLinh.Controllers
             _context.SaveChanges();
             return Ok();
         }
-        
+
 
 
     }

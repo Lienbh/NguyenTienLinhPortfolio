@@ -10,16 +10,10 @@ namespace NguyenTienLinh.Models
         public int STT { get; set; }
 
         public string Title { get; set; }
-
+        public int IdCategories { get; set; }
         public string VideoLinks { get; set; }
 
-       
-
         [ForeignKey("IdCategories")]
-
-        public int IdCategories { get; set; }
-
-       
         public virtual Categories Categories { get; set; }
     }
 }

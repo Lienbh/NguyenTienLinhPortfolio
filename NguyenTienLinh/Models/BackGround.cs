@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace NguyenTienLinh.Models;
 
@@ -13,6 +10,7 @@ public partial class BackGround
     public int IdBackGround { get; set; }
     [Required]
     public string Image { get; set; }
+    [Required]
+    public int TimeInterval { get; set; } = 3000;
 
 }
- 

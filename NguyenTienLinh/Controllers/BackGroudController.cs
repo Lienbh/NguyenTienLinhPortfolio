@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BuildingBlock.DTOS;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
-using NguyenTienLinh.DTOS;
 using NguyenTienLinh.Models;
-using nguyentienlink_api.Controllers;
 
 namespace NguyenTienLinh.Controllers
 {
@@ -18,23 +16,23 @@ namespace NguyenTienLinh.Controllers
             logger = _logger;
             _context = new AppDbContext();
         }
-        [HttpGet(Name = "BackgroudController")]
+        [HttpGet()]
         public IEnumerable<BackGround> Get()
         {
             return _context.BackGround.ToList();
         }
 
-    
-    [HttpGet("{id}")]
-    public IActionResult Get( int id)
-    {
-        var backgroud = _context.BackGround.Find(id);
-        if (backgroud == null)
+
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
         {
-            return NotFound();
+            var backgroud = _context.BackGround.Find(id);
+            if (backgroud == null)
+            {
+                return NotFound();
+            }
+            return Ok(backgroud);
         }
-        return Ok(backgroud);
-    }
 
         [HttpPost]
         public IActionResult Post([FromBody] BackGroudDTO backgroud)
@@ -44,6 +42,7 @@ namespace NguyenTienLinh.Controllers
             {
                 BackGround backGroundCreate = new BackGround();
                 backGroundCreate.Image = backgroud.Image;
+                backGroundCreate.TimeInterval = backgroud.TimeInterval;
                 _context.BackGround.Add(backGroundCreate);
                 _context.SaveChanges();
                 return Ok();
@@ -61,6 +60,7 @@ namespace NguyenTienLinh.Controllers
                 return NotFound();
             }
             entity.Image = backgroud.Image;
+            entity.TimeInterval = backgroud.TimeInterval;
             _context.BackGround.Update(entity);
             _context.SaveChanges();
             return Ok();

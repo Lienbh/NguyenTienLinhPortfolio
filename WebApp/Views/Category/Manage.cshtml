@@ -1,0 +1,205 @@
+﻿@model BuildingBlock.DTOS.ManageCategoriesDTO;
+@{
+    int indexer = 0;
+    ViewData["Title"] = "Manage";
+    Layout = "_Layout";
+}
+<div class="row modelContainer">
+    <div class="col-lg-8 offset-2">
+        <div class="row mt-3 mb-0">
+        
+            <div class="col-lg-12 d-flex justify-content-end">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#create" class="btn btn-outline-primary">Thêm mới danh mục </button>
+            </div>
+        </div>
+        <table class="table caption-top table-bordered table-responsive">
+            <caption>Danh sách danh mục</caption>  
+    </div>
+    <thead>
+        <tr>
+            <th scope="col" style="width:2%">#</th>
+            <th scope="col" style="width:19%">Tên danh mục</th>
+            <th scope="col" style="width:60%">Ảnh danh mục</th>
+            <th scope="col" style="width:12%">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in @Model.Categories)
+        {
+            <tr>
+                <th scope="row">@(++indexer)</th>
+                <td>@item.CategoryName</td>
+                <td><img src="/assets/projects/@item.BrandingImage" class="rounded cate-img" alt="..."></td>
+                <td>
+                    <button type="button" data-param-id="@item.IdCategories" data-param-name="@item.CategoryName" data-param-img="@item.BrandingImage" data-bs-toggle="modal" data-bs-target="#update" class="btn btn-outline-warning">Sửa</button>
+                    <button type="button" class="btn btn-outline-danger" data-param-id="@item.IdCategories" data-bs-toggle="modal" data-bs-target="#delete">Xóa</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+    </table>
+</div>
+</div>
+<div class="modal fade " id="update" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="UpdateMyWork" enctype="multipart/form-data" style="width:100%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm mới danh mục</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Tên danh mục: <span class="text-danger">*</span></label>
+                        <input type="text" name="CategoryName" class="form-control" required maxlength="250" id="categories-name-update">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Ảnh danh mục: <span class="text-danger">*</span></label>
+                        <img src="" id="preview-img-update" class="rounded cate-img" alt="...">
+                        <input name="photo" type="file" id="fileInput-update mt-2"
+                               class="form-control" />
+                    </div>
+                    <div>
+                        <input id="BrandingImage-update" hidden name="BrandingImage" value="@Model.BrandingImage" class="form-control" />
+                        <input id="IdCategories-update" hidden name="IdCategories" value="@Model.IdCategories" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade " id="create" tabindex="-1" aria-labelledby="exampleModalLabelCreate" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="CreateMyWork" enctype="multipart/form-data" style="width:100%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm mới danh mục</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Tên danh mục: <span class="text-danger">*</span></label>
+                        <input type="text" name="CategoryName" class="form-control" required maxlength="250" id="categories-name-create">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Ảnh danh mục: <span class="text-danger">*</span></label>
+                        <img src="" id="preview-img-create" class="rounded cate-img" alt="...">
+                        <input name="photo" type="file" id="fileInput-create" class="form-control mt-2" />
+                    </div> 
+               
+                    <div>
+                        <input id="BrandingImage-create" hidden name="BrandingImage" value="@Model.BrandingImage" class="form-control" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade " id="delete" tabindex="-1" aria-labelledby="exampleModalLabelCreate" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form asp-action="DeleteMyWork" enctype="multipart/form-data" style="width:100%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Xóa danh mục</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input hidden name="id" id="IdCategories_Delete" value="@Model.IdCategories" class="form-control" />
+                    Bạn có chắc muốn xóa danh mục này ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#update').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var valueName = button.data('param-name');
+            var valueImg = button.data('param-img');
+            var id = button.data('param-id');
+            var modal = $(this);
+            modal.find('.modal-body #categories-name-update').val(valueName);
+            $('#preview-img-update').attr('src', `/assets/projects/${valueImg}`);
+            $('#BrandingImage-update').val(valueImg);
+            $('#IdCategories-update').val(id);
+        });
+   
+        $('#delete').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('param-id');
+            var modal = $(this);
+            console.log(id);
+            $('#IdCategories_Delete').val(id);
+        });
+
+        $('#create').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var valueName = button.data('param-name');
+            var modal = $(this);
+            modal.find('.modal-body #categories-name-create').val(valueName);
+            $('#preview-img-create').attr('src', `/assets/projects/empty.png`);
+        });
+
+        $('#fileInput-update').on('change', function (event) {
+            var formData = new FormData();
+            var file = $('#fileInput-update')[0].files[0];
+            if (file) {
+                formData.append('photo', file);
+            }
+            $.ajax({
+                url: '@Url.Action("HandleFileChange", "MyWork")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    $('#preview-img-update').attr('src', `/assets/projects/${response.imgNew}`);
+                    $('#BrandingImage-update').val(response.imgNew);
+                },
+                error: function (xhr, status, error) {
+                }
+            });
+        });
+
+        $('#fileInput-create').on('change', function (event) {
+            var formData = new FormData();
+            var file = $('#fileInput-create')[0].files[0];
+            if (file) {
+                formData.append('photo', file);
+            }
+            $.ajax({
+                url: '@Url.Action("HandleFileChange", "MyWork")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    console.log(response.imgNew);
+                    $('#preview-img-create').attr('src', `/assets/projects/${response.imgNew}`);
+                    $('#BrandingImage-create').val(response.imgNew);
+                },
+                error: function (xhr, status, error) {
+                }
+            });
+        });
+    });
+</script>
+@section scripts {
+    <script type="text/javascript">
+        @Html.Raw(ViewBag.SweetAlertShowMessage)
+    </script>
+}

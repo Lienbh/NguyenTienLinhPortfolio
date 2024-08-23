@@ -11,6 +11,7 @@ a.navbar-brand {
 
 a {
   color: #0077cc;
+ text-decoration:none !important;
 }
 
 .btn-primary {
@@ -62,6 +63,7 @@ button.accept-policy {
 }
 .textDecoration{
   text-decoration: none;
+  cursor: pointer;
 }
 
 @media (max-width: 768px){
@@ -85,4 +87,10 @@ button.accept-policy {
 .logoWidth {
     width:40px;
 }
-
+.nav-link {
+  text-decoration:none;
+}
+.fixed-bottom {
+    position: fixed;
+    bottom: 0;
+}

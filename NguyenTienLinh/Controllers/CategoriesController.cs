@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BuildingBlock.DTOS;
 using Microsoft.AspNetCore.Mvc;
 using NguyenTienLinh.Context;
 using NguyenTienLinh.Models;
@@ -19,7 +19,7 @@ namespace nguyentienlink_api.Controllers
             logger = _logger;
             _context = new AppDbContext();
         }
-        [HttpGet(Name = "CategoriesController")]
+        [HttpGet()]
         public IEnumerable<Categories> Get()
         {
             return _context.Categories.ToList();
@@ -34,21 +34,51 @@ namespace nguyentienlink_api.Controllers
             }
             return Ok(category);
         }
-       
+
+        [HttpGet("get-detail/{id}")]
+        public MyWorkPartialDTO GetDetail(int id)
+        {
+            var category = _context.Categories.Find(id);
+            if (category == null)
+            {
+                return new MyWorkPartialDTO();
+            }
+            MyWorkPartialDTO myWorkPartialDTO = new MyWorkPartialDTO();
+            myWorkPartialDTO.Heading = category.CategoryName;
+            var listVideo = _context.Videos.Where(c => c.IdCategories == id).ToList().OrderBy(c => c.STT).ThenBy(c => c.IdVideo);
+            myWorkPartialDTO.videoDTOs = new List<VideoDTO>();
+            if (listVideo.Count() > 0)
+            {
+
+                foreach (var video in listVideo)
+                {
+                    VideoDTO videoDTO = new VideoDTO();
+                    videoDTO.Title = video.Title;
+                    videoDTO.VideoLinks = video.VideoLinks;
+                    videoDTO.IdVideo = video.IdVideo;
+                    myWorkPartialDTO.videoDTOs.Add(videoDTO);
+                }
+            }
+            return myWorkPartialDTO;
+        }
+
         [HttpPost]
-        public IActionResult Post([FromBody] Categories category)
+        public IActionResult Post([FromBody] CategoriesDTO category)
         {
             if (ModelState.IsValid)
             {
-                _context.Categories.Add(category);
+                Categories categoryCreate = new Categories();
+                categoryCreate.CategoryName = category.CategoryName;
+                categoryCreate.BrandingImage = category.BrandingImage;
+                _context.Categories.Add(categoryCreate);
                 _context.SaveChanges();
                 return Ok();
             }
             return BadRequest();
         }
-        
+
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Categories  category)
+        public IActionResult Put(int id, [FromBody] CategoriesDTO category)
         {
             var entity = _context.Categories.Find(id);
             if (entity == null)
@@ -56,11 +86,12 @@ namespace nguyentienlink_api.Controllers
                 return NotFound();
             }
             entity.CategoryName = category.CategoryName;
-            
+            entity.BrandingImage = category.BrandingImage;
+            _context.Categories.Update(entity);
             _context.SaveChanges();
             return Ok();
         }
-       
+
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

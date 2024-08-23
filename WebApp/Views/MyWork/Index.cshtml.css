@@ -28,6 +28,7 @@
 .textDeco {
     text-decoration: none;
     color: #000;
+    cursor:pointer;
     background: linear-gradient(0deg, slateblue, slateblue) no-repeat right bottom /
     0 var(--bg-h);
     transition: background-size 350ms;
@@ -54,7 +55,24 @@
 .weddingTitle {
     text-align: center;
 }
+.textDeco-child {
+    text-decoration: none;
+    color: #000;
+    font-size: 14px;
+    cursor: pointer;
+    background: linear-gradient(0deg, slateblue, slateblue) no-repeat right bottom / 0 var(--bg-h);
+    transition: background-size 350ms;
+    --bg-h: 100%;
+    padding-bottom: 2px;
+    --bg-h: 2px;
+    color: inherit;
+    line-height: 1;
+}
 
+    .textDeco-child:where(:hover, :focus-visible) {
+        background-size: 100% var(--bg-h);
+        background-position-x: left;
+    }
 
 @media (min-width: 768px) and (max-width: 1200px) {
     .title {
