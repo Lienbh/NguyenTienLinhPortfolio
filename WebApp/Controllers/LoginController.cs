@@ -6,6 +6,14 @@ namespace WebApp.Controllers
 {
     public class LoginController : Controller
     {
+
+        private readonly IConfiguration _configuration;
+
+        public LoginController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public IActionResult Index()
         {
             var getCurrentUser = HttpContext.Session.GetString("currentUser");
@@ -21,8 +29,9 @@ namespace WebApp.Controllers
         [HttpPost]
         public IActionResult Login(UserDTO user)
         {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
 
-            string requestURL = $"https://localhost:7130/api/User/login";
+            string requestURL = $"{apiUrl}/api/User/login";
 
             HttpClient client = new HttpClient();
             var response = client.PostAsJsonAsync(requestURL, user).Result;

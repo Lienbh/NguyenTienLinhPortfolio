@@ -19,7 +19,8 @@ namespace NguyenTienLinh
 
             //gọi đến login controller
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("nguyentienlinh_2")));
+
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Conn")));
             builder.Services.AddControllers();
             builder.Services.AddTransient<IAboutsRepos, AboutRepo>();
             builder.Services.AddTransient<ICategoriesRepo, CategoriesRepos>();
@@ -32,7 +33,7 @@ namespace NguyenTienLinh
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-           
+
             builder.Services.AddCors(option =>
             {
                 option.AddPolicy("AllowForntend",
@@ -67,14 +68,14 @@ namespace NguyenTienLinh
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 
-            
+
             app.MapControllers();
 
             app.Run();

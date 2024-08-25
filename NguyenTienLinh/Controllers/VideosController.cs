@@ -11,14 +11,14 @@ namespace nguyentienlink_api.Controllers
     public class VideosController : ControllerBase
     {
         private readonly ILogger<VideosController> _logger;
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public VideosController(ILogger<VideosController> logger)
+        public VideosController(ILogger<VideosController> logger, AppDbContext context)
         {
-            logger = _logger;
-
-            _context = new AppDbContext();
+            _logger = logger;
+            _context = context;
         }
+
         [HttpGet]
 
         public IEnumerable<Videos> Get()

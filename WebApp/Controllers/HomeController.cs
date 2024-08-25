@@ -7,10 +7,12 @@ namespace WebApp.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -20,9 +22,11 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+
             HttpClient client = new HttpClient();
-            string requestBackGroundURL = $"https://localhost:7130/api/BackGroud";
-            string requestCategoriesURL = $"https://localhost:7130/api/Categories";
+            string requestBackGroundURL = $"{apiUrl}/api/BackGroud";
+            string requestCategoriesURL = $"{apiUrl}/api/Categories";
 
             var responseBackGround = client.GetFromJsonAsync<List<BackGroudDTO>>(requestBackGroundURL).Result;
             var responseCategories = client.GetFromJsonAsync<List<CategoriesDTO>>(requestCategoriesURL).Result;
@@ -55,8 +59,9 @@ namespace WebApp.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
 
-            string requestURL = $" https://localhost:7130/api/Categories/get-detail/{id}";
+            string requestURL = $" {apiUrl}/api/Categories/get-detail/{id}";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<MyWorkPartialDTO>(requestURL).Result;
             return View(response);
@@ -105,8 +110,9 @@ namespace WebApp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
 
-            string requestURL = $"https://localhost:7130/api/BackGroud";
+            string requestURL = $"{apiUrl}/api/BackGroud";
             HttpClient client = new HttpClient();
             var reponse = client.GetFromJsonAsync<List<BackGroudDTO>>(requestURL).Result;
             return View(reponse);
@@ -120,13 +126,15 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/BackGroud";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+
+            string requestURL = $"{apiUrl}/api/BackGroud";
             HttpClient client = new HttpClient();
             var response = client.PostAsJsonAsync(requestURL, backGroudDTO).Result;
 
 
 
-            string requestGetURL = $"https://localhost:7130/api/BackGroud";
+            string requestGetURL = $"{apiUrl}/api/BackGroud";
             List<BackGroudDTO> backGroudDTOs = new List<BackGroudDTO>();
             backGroudDTOs = client.GetFromJsonAsync<List<BackGroudDTO>>(requestGetURL).Result;
 
@@ -148,13 +156,14 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/BackGroud/{backGroudDTO.IdBackGround}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/BackGroud/{backGroudDTO.IdBackGround}";
             HttpClient client = new HttpClient();
             var response = client.PutAsJsonAsync(requestURL, backGroudDTO).Result;
 
 
 
-            string requestGetURL = $"https://localhost:7130/api/BackGroud";
+            string requestGetURL = $"{apiUrl}/api/BackGroud";
             List<BackGroudDTO> backGroudDTOs = new List<BackGroudDTO>();
             backGroudDTOs = client.GetFromJsonAsync<List<BackGroudDTO>>(requestGetURL).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -175,11 +184,13 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/BackGroud/{IdBackGround}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+
+            string requestURL = $"{apiUrl}/api/BackGroud/{IdBackGround}";
             HttpClient client = new HttpClient();
             var response = client.DeleteAsync(requestURL).Result;
 
-            string requestGetURL = $"https://localhost:7130/api/BackGroud";
+            string requestGetURL = $"{apiUrl}/api/BackGroud";
             List<BackGroudDTO> backGroudDTOs = new List<BackGroudDTO>();
             backGroudDTOs = client.GetFromJsonAsync<List<BackGroudDTO>>(requestGetURL).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)

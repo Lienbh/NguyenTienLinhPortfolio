@@ -6,6 +6,13 @@ namespace WebApp.Controllers
 {
     public class CategoryController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public CategoryController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public IActionResult Index()
         {
             var getCurrentUser = HttpContext.Session.GetString("currentUser");
@@ -13,7 +20,9 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Categories";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+
+            string requestURL = $"{apiUrl}/api/Categories";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<IEnumerable<CategoriesDTO>>(requestURL).Result;
             return View(response);
@@ -29,8 +38,9 @@ namespace WebApp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
 
-            string requestURL = $"https://localhost:7130/api/Categories";
+            string requestURL = $"{apiUrl}/api/Categories";
             HttpClient client = new HttpClient();
             ManageCategoriesDTO manageCategoriesDTO = new ManageCategoriesDTO();
             manageCategoriesDTO.Categories = client.GetFromJsonAsync<List<CategoriesDTO>>(requestURL).Result;
@@ -45,13 +55,14 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Categories";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Categories";
             HttpClient client = new HttpClient();
             var response = client.PostAsJsonAsync(requestURL, categoriesDTO).Result;
 
 
 
-            string requestGetURL = $"https://localhost:7130/api/Categories";
+            string requestGetURL = $"{apiUrl}/api/Categories";
             ManageCategoriesDTO manageCategoriesDTO = new ManageCategoriesDTO();
             manageCategoriesDTO.Categories = client.GetFromJsonAsync<List<CategoriesDTO>>(requestGetURL).Result;
 
@@ -73,11 +84,12 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Categories/{categoriesDTO.IdCategories}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Categories/{categoriesDTO.IdCategories}";
             HttpClient client = new HttpClient();
             var response = client.PutAsJsonAsync(requestURL, categoriesDTO).Result;
 
-            string requestGetURL = $"https://localhost:7130/api/Categories";
+            string requestGetURL = $"{apiUrl}/api/Categories";
             ManageCategoriesDTO manageCategoriesDTO = new ManageCategoriesDTO();
             manageCategoriesDTO.Categories = client.GetFromJsonAsync<List<CategoriesDTO>>(requestGetURL).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -98,11 +110,12 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Categories/{id}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Categories/{id}";
             HttpClient client = new HttpClient();
             var response = client.DeleteAsync(requestURL).Result;
 
-            string requestGetURL = $"https://localhost:7130/api/Categories";
+            string requestGetURL = $"{apiUrl}/api/Categories";
             ManageCategoriesDTO manageCategoriesDTO = new ManageCategoriesDTO();
             manageCategoriesDTO.Categories = client.GetFromJsonAsync<List<CategoriesDTO>>(requestGetURL).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -133,7 +146,8 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $" https://localhost:7130/api/Categories/get-detail/{id}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $" {apiUrl}/api/Categories/get-detail/{id}";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<MyWorkPartialDTO>(requestURL).Result;
 

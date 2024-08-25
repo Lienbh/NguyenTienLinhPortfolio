@@ -11,16 +11,14 @@ namespace nguyentienlink_api.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
 
-
-
-
-        public UserController(ILogger<UserController> logger)
+        public UserController(ILogger<UserController> logger, AppDbContext context)
         {
-            logger = _logger;
-            _context = new AppDbContext();
+            _logger = logger;
+            _context = context;
         }
+
         [HttpGet(Name = "UserController")]
         public IEnumerable<User> Get()
         {

@@ -12,13 +12,14 @@ namespace nguyentienlink_api.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ILogger<CategoriesController> _logger;
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
 
-        public CategoriesController(ILogger<CategoriesController> logger)
+        public CategoriesController(ILogger<CategoriesController> logger, AppDbContext context)
         {
-            logger = _logger;
-            _context = new AppDbContext();
+            _logger = logger;
+            _context = context;
         }
+
         [HttpGet()]
         public IEnumerable<Categories> Get()
         {

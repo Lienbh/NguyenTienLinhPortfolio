@@ -10,11 +10,12 @@ namespace NguyenTienLinh.Controllers
     public class AboutController : ControllerBase
     {
         private readonly ILogger<AboutController> _logger;
-        private AppDbContext _context;
-        public AboutController(ILogger<AboutController> logger)
+        private readonly AppDbContext _context;
+
+        public AboutController(ILogger<AboutController> logger, AppDbContext context)
         {
-            logger = _logger;
-            _context = new AppDbContext();
+            _logger = logger;
+            _context = context;
         }
 
         [HttpGet]

@@ -5,17 +5,20 @@ namespace NguyenTienLinh.Context
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext()
-        {
+        private readonly IConfiguration _configuration;
 
-        }
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration configuration) : base(options)
         {
+            _configuration = configuration;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-A9Q63JRK\\SQLEXPRESS;Database=ProfileDatabase;Trusted_Connection=True;TrustServerCertificate=True;Connection Timeout=120;");
+            if (!optionsBuilder.IsConfigured)
+            {
+                var connectionString = _configuration.GetConnectionString("Conn");
+                optionsBuilder.UseSqlServer(connectionString);
+            }
         }
 
         public DbSet<Videos> Videos { get; set; }

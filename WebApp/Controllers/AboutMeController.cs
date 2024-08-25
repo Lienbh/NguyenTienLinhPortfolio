@@ -5,6 +5,12 @@ namespace WebApp.Controllers
 {
     public class AboutMeController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public AboutMeController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         public IActionResult Index()
         {
             var getCurrentUser = HttpContext.Session.GetString("currentUser");
@@ -12,7 +18,8 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/About/AboutProfile";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/About/AboutProfile";
             // Bước 2 Lấy response (body) 
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<AboutDTO>(requestURL).Result;
@@ -24,7 +31,8 @@ namespace WebApp.Controllers
 
         public IActionResult Edit(string id)
         {
-            string requestURL = $"https://localhost:7130/api/About/{id}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/About/{id}";
             // Bước 2 Lấy response (body) 
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<AboutDTO>(requestURL).Result;
@@ -73,8 +81,9 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
 
-            string requestURL = $"https://localhost:7130/api/About/{about.IdAbout}";
+            string requestURL = $"{apiUrl}/api/About/{about.IdAbout}";
 
             HttpClient client = new HttpClient();
             var response = client.PutAsJsonAsync(requestURL, about).Result;

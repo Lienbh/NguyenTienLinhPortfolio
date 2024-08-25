@@ -6,6 +6,13 @@ namespace WebApp.Controllers
 {
     public class MyWorkController : Controller
     {
+        private readonly IConfiguration _configuration;
+
+        public MyWorkController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public IActionResult Index()
         {
             var getCurrentUser = HttpContext.Session.GetString("currentUser");
@@ -13,7 +20,8 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Categories";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Categories";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<IEnumerable<CategoriesDTO>>(requestURL).Result;
             return View(response);
@@ -29,7 +37,8 @@ namespace WebApp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-            string requestURL = $"https://localhost:7130/api/Videos/get-video-by-categoryid/{categoriesId}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Videos/get-video-by-categoryid/{categoriesId}";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<ManageVideoDTO>(requestURL).Result;
             return View(response);
@@ -43,11 +52,12 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Videos";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Videos";
             HttpClient client = new HttpClient();
             var response = client.PostAsJsonAsync(requestURL, videoDTO).Result;
 
-            string requestGetURL = $"https://localhost:7130/api/Videos/get-video-by-categoryid/{videoDTO.IdCategories}";
+            string requestGetURL = $"{apiUrl}/api/Videos/get-video-by-categoryid/{videoDTO.IdCategories}";
             var responseGet = client.GetFromJsonAsync<ManageVideoDTO>(requestGetURL).Result;
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -68,13 +78,14 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Videos/{videoDTO.IdVideo}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Videos/{videoDTO.IdVideo}";
             HttpClient client = new HttpClient();
             var response = client.PutAsJsonAsync(requestURL, videoDTO).Result;
 
 
 
-            string requestGetURL = $"https://localhost:7130/api/Videos/get-video-by-categoryid/{videoDTO.IdCategories}";
+            string requestGetURL = $"{apiUrl}/api/Videos/get-video-by-categoryid/{videoDTO.IdCategories}";
             var responseGet = client.GetFromJsonAsync<ManageVideoDTO>(requestGetURL).Result;
 
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -95,11 +106,12 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-            string requestURL = $"https://localhost:7130/api/Videos/{id}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $"{apiUrl}/api/Videos/{id}";
             HttpClient client = new HttpClient();
             var response = client.DeleteAsync(requestURL).Result;
 
-            string requestGetURL = $"https://localhost:7130/api/Videos/get-video-by-categoryid/{IdCategories}";
+            string requestGetURL = $"{apiUrl}/api/Videos/get-video-by-categoryid/{IdCategories}";
             var responseGet = client.GetFromJsonAsync<ManageVideoDTO>(requestGetURL).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
@@ -128,8 +140,8 @@ namespace WebApp.Controllers
             {
                 TempData["currentUser"] = getCurrentUser;
             }
-
-            string requestURL = $" https://localhost:7130/api/Categories/get-detail/{id}";
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            string requestURL = $" {apiUrl}/api/Categories/get-detail/{id}";
             HttpClient client = new HttpClient();
             var response = client.GetFromJsonAsync<MyWorkPartialDTO>(requestURL).Result;
 

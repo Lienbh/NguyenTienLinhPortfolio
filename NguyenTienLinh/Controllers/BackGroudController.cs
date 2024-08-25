@@ -10,12 +10,14 @@ namespace NguyenTienLinh.Controllers
     public class BackGroudController : ControllerBase
     {
         private readonly ILogger<BackGroudController> _logger;
-        private AppDbContext _context;
-        public BackGroudController(ILogger<BackGroudController> logger)
+        private readonly AppDbContext _context;
+
+        public BackGroudController(ILogger<BackGroudController> logger, AppDbContext context)
         {
-            logger = _logger;
-            _context = new AppDbContext();
+            _logger = logger;
+            _context = context;
         }
+
         [HttpGet()]
         public IEnumerable<BackGround> Get()
         {
