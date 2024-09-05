@@ -43,7 +43,7 @@
             <div class="row mt-5">
                 <div class="col-lg-2 col-3">
 
-                    <h1 class="title redirecter">
+                    <h1 class="title">
                         <span class="textDeco" data-param="@item.IdCategories">
                             @item.CategoryName
                         </span>
@@ -105,6 +105,27 @@
                     alert('Error occurred while calling the method.');
                 }
             });
+        });
+        $('.textDeco').click(function (event) {
+            event.preventDefault(); // Prevent the default link behavior
+
+            // Get parameters from data attributes
+            var paramId = $(this).data('param');
+
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("RedirectMyWorkPartialView", "MyWork")',
+                data: { id: paramId },
+                success: function (response) {
+                    window.location.href = response.redirectToUrl + '/' + paramId;
+
+                },
+                error: function () {
+                    alert('Error occurred while calling the method.');
+                }
+            });
+       
         });
         
         $('.btn-warping').click(function (event) {

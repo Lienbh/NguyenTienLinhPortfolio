@@ -19,7 +19,7 @@ ViewData["Title"] = "My Work";
                 <div class="col-lg-2 col-3">
                     
                     <h1 class="title">
-                        <span class="textDeco redirecter" data-param="@item.IdCategories">
+                        <span class="textDeco " data-param="@item.IdCategories">
                             @item.CategoryName
                         </span>
                         @if (!string.IsNullOrEmpty(userName))
@@ -76,6 +76,27 @@ ViewData["Title"] = "My Work";
             data: { id: paramId },
             success: function (response) {
                 window.location.href = urlRedirect;
+            },
+            error: function () {
+                alert('Error occurred while calling the method.');
+            }
+        });
+        
+    });
+    $('.textDeco').click(function (event) {
+        event.preventDefault(); // Prevent the default link behavior
+
+        // Get parameters from data attributes
+        var paramId = $(this).data('param');
+
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("RedirectMyWorkPartialView", "MyWork")',
+            data: { id: paramId },
+            success: function (response) {
+                window.location.href = response.redirectToUrl + '/' + paramId;
+
             },
             error: function () {
                 alert('Error occurred while calling the method.');
