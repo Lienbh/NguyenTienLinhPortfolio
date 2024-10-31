@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   ntlapi:
     image: ${DOCKER_REGISTRY-}ntlapi:${PLATFORM:-linux}-${TAG:-latest}
@@ -16,6 +15,6 @@ services:
 #network section
 networks:
   default:
-    name: tana_microservices
+    name: tana_networking
     driver: bridge
 
