@@ -4,11 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="wwwroot\img\**" />
     <Content Remove="wwwroot\img\**" />
+    <Content Include="..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
     <EmbeddedResource Remove="wwwroot\img\**" />
     <None Remove="wwwroot\img\**" />
   </ItemGroup>
@@ -18,11 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BuildingBlock\BuildingBlock.csproj" />
+    <Folder Include="Configuration\" />
+    <Folder Include="wwwroot\L\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\L\" />
+    <ProjectReference Include="..\BuildingBlock\BuildingBlock.csproj" />
   </ItemGroup>
 
 </Project>

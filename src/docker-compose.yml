@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ntlapi:
+    image: ${DOCKER_REGISTRY-}ntlapi:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: NguyenTienLinh/Dockerfile
+
+  ntlwebapp:
+    image: ${DOCKER_REGISTRY-}ntlwebapp:${PLATFORM:-linux}-${TAG:-latest}
+    build:
+      context: .
+      dockerfile: WebApp/Dockerfile
+
+#network section
+networks:
+  default:
+    name: tana_microservices
+    driver: bridge
+

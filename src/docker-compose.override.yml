@@ -1,0 +1,37 @@
+services:
+  ntlapi:
+    container_name: ntlapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+#      - ASPNETCORE_Kestrel__Certificates__Default__Password=YourPassword
+#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ${HOME}/.aspnet/https:/https:ro
+      - ./wwwroot:/app/wwwroot
+    ports:
+      - "7130:80"    # Add this to expose HTTPS port 443
+    networks:
+      - ntl-network
+    restart: always
+
+  ntlwebapp:
+    container_name: ntlwebapp
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+#      - ASPNETCORE_Kestrel__Certificates__Default__Password=YourPassword
+#      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    volumes:
+      - ${HOME}/.aspnet/https:/https:ro
+    depends_on:
+      - ntlapi
+    ports:
+      - "7295:80"    # Exposing HTTPS port for WEBAPP
+    networks:
+      - ntl-network
+    restart: always
+
+networks:
+  ntl-network:
+    driver: bridge

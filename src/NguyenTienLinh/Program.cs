@@ -1,4 +1,5 @@
 ﻿
+using System.Net;
 using AppApi.IRepository;
 using AppApi.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +12,7 @@ namespace NguyenTienLinh
 {
     public class Program
     {
+        
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +21,14 @@ namespace NguyenTienLinh
 
             //gọi đến login controller
             builder.Services.AddControllersWithViews();
-
+            // builder.WebHost.ConfigureKestrel(options =>
+            // {
+            //     options.Listen(IPAddress.Any, 80); // HTTP port
+            //     options.Listen(IPAddress.Any, 443, listenOptions =>
+            //     {
+            //         listenOptions.UseHttps("/https/aspnetapp.pfx", "YourPassword");
+            //     });
+            // });
             builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Conn")));
             builder.Services.AddControllers();
             builder.Services.AddTransient<IAboutsRepos, AboutRepo>();
@@ -80,5 +89,6 @@ namespace NguyenTienLinh
 
             app.Run();
         }
+        
     }
 }
