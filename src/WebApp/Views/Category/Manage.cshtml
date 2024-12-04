@@ -5,7 +5,7 @@
     Layout = "_Layout";
 }
 <div class="row modelContainer">
-    <div class="col-lg-8 offset-2">
+    <div class="col-lg-8 offset-lg-2 col-12">
         <div class="row mt-3 mb-0">
         
             <div class="col-lg-12 d-flex justify-content-end">
@@ -17,17 +17,17 @@
     </div>
     <thead>
         <tr>
-            <th scope="col" style="width:2%">#</th>
-            <th scope="col" style="width:19%">Tên danh mục</th>
-            <th scope="col" style="width:60%">Ảnh danh mục</th>
-            <th scope="col" style="width:12%">Thao tác</th>
+          
+            <th scope="col" style="width:19%" class="th-category-name">Tên danh mục</th>
+            <th scope="col" style="width:60%" class="th-category-img">Ảnh danh mục</th>
+            <th scope="col" style="width:12%" class="action">Thao tác</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in @Model.Categories)
         {
             <tr>
-                <th scope="row">@(++indexer)</th>
+               
                 <td>@item.CategoryName</td>
                 <td><img src="/assets/projects/@item.BrandingImage" class="rounded cate-img" alt="..."></td>
                 <td>

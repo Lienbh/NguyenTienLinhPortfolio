@@ -1,9 +1,9 @@
-﻿.carouselWrap {
-
-}
-
+﻿
 .rl {
     position: relative;
+}
+.carouselWrap {
+    margin-top: 60px;
 }
 .btn-warping {
     position: absolute;

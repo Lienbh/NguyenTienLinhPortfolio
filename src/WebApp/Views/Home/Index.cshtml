@@ -11,8 +11,8 @@
             <div class="carousel-inner">
                 @foreach(var x in Model.BackGroudDTOs)
                 {
-                    @(++carouselAvtiver)
-                    <div class="carousel-item @(carouselAvtiver==1?"active":"")" data-bs-interval="@x.TimeInterval">
+                   
+                    <div class="carousel-item" data-bs-interval="@x.TimeInterval">
                         <img src="assets/ntlinh/@x.Image" alt="" class="" style="width: 100%" loading="lazy" />
                     </div>
                 }

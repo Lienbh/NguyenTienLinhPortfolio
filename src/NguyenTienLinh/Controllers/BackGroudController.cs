@@ -21,7 +21,8 @@ namespace NguyenTienLinh.Controllers
         [HttpGet()]
         public IEnumerable<BackGround> Get()
         {
-            return _context.BackGround.ToList();
+            var res =_context.BackGround.ToList();
+            return res;
         }
 
 
