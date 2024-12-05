@@ -56,9 +56,31 @@
 }
 
 
-@media (min-width: 768px) and (max-width: 1200px) {
+@media (min-width: 768px) and (max-width: 1024px) {
     .title {
         font-size: 2rem !important;
+    }
+    .title {
+        font-size: 1.5rem !important;
+    }
+    .title {
+        font-size: 0.8rem !important;
+    }
+    td {
+        font-size: 10px !important;
+    }
+    th {
+        font-size: 12px !important;
+    }
+    iframe {
+        height: 150px !important;
+        width: 100% !important;
+    }
+    .th-link-video {
+        width: 51.2% !important;
+    }
+    .action {
+        width: 30% !important;
     }
 }
 @media (max-width: 768px) {
@@ -75,11 +97,11 @@
         font-size: 12px !important;
     }
     iframe {
-        height: 100px !important;
-        width: 120px !important;
+        height: 150px !important;
+        width: 100% !important;
     }
     .th-link-video {
-        width: 30% !important;
+        width: 54.2% !important;
     }
     .action {
         width: 30% !important;

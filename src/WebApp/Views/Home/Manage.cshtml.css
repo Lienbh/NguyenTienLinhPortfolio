@@ -56,9 +56,15 @@
 }
 
 
-@media (min-width: 768px) and (max-width: 1200px) {
+@media (min-width: 768px) and (max-width: 1024px) {
     .title {
         font-size: 2rem !important;
+    }
+    .th-action {
+        width: 20% !important;
+    }
+    .th-time {
+        width: 25% !important;
     }
 }
 @media (max-width: 768px) {
@@ -123,11 +129,11 @@
         height: 100px !important;
         width: 120px !important;
     }
-    .th-link-video {
-        width: 30% !important;
-    }
-    .action {
-        width: 30% !important;
+    .th-image {
+        width: 15% !important;
+    } 
+    .th-time {
+        width: 5% !important;
     }
 }
 .modelContainer {

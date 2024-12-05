@@ -65,10 +65,36 @@ button.accept-policy {
   text-decoration: none;
   cursor: pointer;
 }
-
+@media (max-width: 1024px){
+  .pdNavlink{
+    text-align: center;
+  }
+  .navbar-light .navbar-nav .nav-link {
+    color: rgba(0, 0, 0, .55);
+    font-size: 14px !important;
+  }
+  .navName{
+    font-size: $font-stack;
+    font-size: 0.8rem !important;
+    text-decoration: none;
+    letter-spacing: 5px;
+    color: #000;
+  }
+}
 @media (max-width: 768px){
   .pdNavlink{
     text-align: center;
+  }
+  .navbar-light .navbar-nav .nav-link {
+    color: rgba(0, 0, 0, .55);
+    font-size: 13px !important;
+  }
+  .navName{
+    font-size: $font-stack;
+    font-size: 0.8rem !important;
+    text-decoration: none;
+    letter-spacing: 3px;
+    color: #000;
   }
 }
 

@@ -17,17 +17,15 @@
     </div>
     <thead>
         <tr>
-            <th scope="col" style="width:2%">#</th>
-            <th scope="col" style="width:60%">Ảnh</th>
-            <th scope="col" style="width:19%">Khoảng thời gian (ms)</th>
-            <th scope="col" style="width:12%">Thao tác</th>
+            <th scope="col" class="th-image" style="width:40%">Ảnh</th>
+            <th scope="col" class="th-time" style="width:14%">Khoảng thời gian (ms)</th>
+            <th scope="col" class="th-action" style="width:12%">Thao tác</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in @Model)
         {
             <tr>
-                <th scope="row">@(++indexer)</th>
 
                 <td><img src="/assets/ntlinh/@item.Image" class="rounded cate-img" alt="..."></td>
                 <td>@item.TimeInterval</td>

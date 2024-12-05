@@ -129,7 +129,8 @@
     .action {
         width: 30% !important;
     }
-}@media (max-width: 768px) {
+}
+@media (max-width: 768px) {
     .title {
         font-size: 1.5rem !important;
     }
@@ -143,11 +144,14 @@
         font-size: 12px !important;
     }
     iframe {
-        height: 100px !important;
-        width: 120px !important;
+        height: 150px !important;
+        width: 100% !important;
+    }
+    .th-category-img {
+        width: 64% !important;
     }
     .th-link-video {
-        width: 30% !important;
+        width: 54.2% !important;
     }
     .action {
         width: 30% !important;
