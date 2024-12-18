@@ -120,3 +120,6 @@ button.accept-policy {
     position: fixed;
     bottom: 0;
 }
+.main-body {
+  transition: margin-top 0.3s ease;
+}

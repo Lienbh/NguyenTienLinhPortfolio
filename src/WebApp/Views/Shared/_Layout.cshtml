@@ -30,7 +30,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>                                       
                 <span class="navbar-collapse collapse" id="navbarCollapse">
-                    <ul class="navbar-nav ms-auto mb-2 mb-md-0">
+                    <ul class="navbar-nav ms-auto mb-2 mb-md-0 text-center">
                         <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Home" asp-action="Index">
                             <span class="nav-link pe-2 pe-lg-5">
                                 HOME
@@ -73,7 +73,7 @@
             </div>
         </nav>
     </header>
-    <div class="">
+    <div class="main-body">
         <main role="main" class="pb-3">
           <div class="body-section">@RenderBody()</div>
         </main>
@@ -131,7 +131,23 @@
     <script src="~/js/sweetalert.min.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const mainBody = document.querySelector('.main-body');
+
+            navbarToggler.addEventListener('click', function() {
+                if (navbarToggler.classList.contains('collapsed')) {
+                   
+                    mainBody.style.marginTop = '0';
+                } else {
+                    mainBody.style.marginTop = '240px';
+                }
+            });
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
