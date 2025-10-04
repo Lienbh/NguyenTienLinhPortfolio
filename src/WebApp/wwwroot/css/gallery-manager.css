@@ -491,95 +491,62 @@ body {
     margin-bottom: 40px;
 }
 
-/* UPDATED GALLERY LAYOUT - Masonry style với ảnh khít nhau */
 .gallery {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    gap: 4px;
-    grid-auto-rows: 180px;
-    grid-auto-flow: dense;
-    padding: 0;
+    margin: 0 auto;
 }
 
-@media (max-width: 1200px) {
-    .gallery {
-        grid-template-columns: repeat(8, 1fr);
-        grid-auto-rows: 160px;
-        gap: 3px;
-    }
-}
-
-@media (max-width: 768px) {
-    .gallery-title-display {
-        font-size: 3em;
-        letter-spacing: 4px;
-    }
-
-    .gallery-title-input {
-        font-size: 2.5em;
-        min-width: 300px;
-        padding: 12px 16px;
-        letter-spacing: 2px;
-    }
-
-    .gallery-title-section {
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .edit-title-btn {
-        font-size: 14px;
-        margin-left: 12px;
-    }
-
-    .hero-actions {
-        gap: 12px;
-    }
-
-    .view-gallery-text {
-        font-size: 13px;
-    }
-
-    .cover-info {
-        padding: 16px 24px;
-        margin: 16px 0;
-    }
-
-    .cover-info-title {
-        font-size: 14px;
-    }
-
-    .cover-info-subtitle {
-        font-size: 12px;
-    }
-
-    .hero-banner-btn,
-    .hero-action-btn {
-        padding: 12px 32px;
-        font-size: 12px;
-    }
-
-    .hero-logo {
-        width: 60px;
-        height: 60px;
-        padding: 6px;
-    }
-
-    .gallery {
-        grid-template-columns: repeat(4, 1fr);
-        grid-auto-rows: 140px;
-        gap: 3px;
-    }
-}
-
-/* UPDATED PHOTO ITEMS - Không bo góc, layout tự nhiên hơn */
+/* Gallery Sizer - Chuẩn width cho Masonry */
+.gallery-sizer,
 .photo-item {
+    width: calc(25% - 4px);
+}
+
+.gallery-sizer {
+    height: 0;
+}
+
+/* Photo Items */
+.photo-item {
+    margin-bottom: 4px;
     position: relative;
     overflow: hidden;
-    border-radius: 0;
     cursor: pointer;
-    background: rgba(0, 0, 0, 0.9);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #000;
+    transition: all 0.3s;
+}
+
+.photo-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.6s;
+    object-fit: cover;
+}
+
+.photo-item.size-small img {
+    height: 200px;
+}
+
+.photo-item.size-medium img {
+    height: 300px;
+}
+
+.photo-item.size-large img {
+    height: 400px;
+}
+
+.photo-item.size-xlarge img {
+    height: 500px;
+}
+
+.photo-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
 }
 
 .photo-item.dragging {
@@ -590,23 +557,6 @@ body {
 .photo-item.drag-over {
     transform: scale(1.02);
     box-shadow: 0 0 0 2px rgba(100, 200, 255, 0.5);
-}
-
-.photo-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-    z-index: 10;
-}
-
-.photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.photo-item:hover img {
-    transform: scale(1.08);
 }
 
 .photo-overlay {
@@ -953,4 +903,78 @@ body {
 .empty-state-text {
     font-size: 18px;
     font-weight: 300;
+}
+
+/* ===== RESPONSIVE - CẬP NHẬT ===== */
+@media (max-width: 1200px) {
+    .gallery-sizer,
+    .photo-item {
+        width: calc(33.333% - 3px);
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery-title-display {
+        font-size: 3em;
+        letter-spacing: 4px;
+    }
+
+    .gallery-title-input {
+        font-size: 2.5em;
+        min-width: 300px;
+        padding: 12px 16px;
+        letter-spacing: 2px;
+    }
+
+    .gallery-title-section {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .edit-title-btn {
+        font-size: 14px;
+        margin-left: 12px;
+    }
+
+    .hero-actions {
+        gap: 12px;
+    }
+
+    .view-gallery-text {
+        font-size: 13px;
+    }
+
+    .cover-info {
+        padding: 16px 24px;
+        margin: 16px 0;
+    }
+
+    .cover-info-title {
+        font-size: 14px;
+    }
+
+    .cover-info-subtitle {
+        font-size: 12px;
+    }
+
+    .hero-banner-btn,
+    .hero-action-btn {
+        padding: 12px 32px;
+        font-size: 12px;
+    }
+
+    .hero-logo {
+        width: 60px;
+        height: 60px;
+        padding: 6px;
+    }
+
+    .gallery-sizer,
+    .photo-item {
+        width: calc(50% - 2px);
+    }
+
+    .gallery-container {
+        padding: 40px 10px 80px;
+    }
 }
