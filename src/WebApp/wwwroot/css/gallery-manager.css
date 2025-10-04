@@ -1,0 +1,956 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Raleway', sans-serif;
+    background: #fff;
+    color: #000;
+    overflow-x: hidden;
+}
+
+/* Hero Banner */
+.hero-banner {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+
+.hero-banner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.hero-banner-bg.loaded {
+    opacity: 1;
+}
+
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.5) 100%
+    );
+    z-index: 1;
+}
+
+.hero-banner-content {
+    position: relative;
+    z-index: 2;
+    animation: fadeInUp 1.2s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-logo {
+    width: 80px;
+    height: 80px;
+    background: rgba(139, 69, 19, 0.9);
+    border-radius: 12px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 8px;
+}
+
+.hero-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.hero-banner .gallery-title-display {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-weight: 700;
+    font-size: 2.4375rem;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.hero-banner-btn {
+    display: inline-block;
+    padding: 16px 48px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.3s;
+    cursor: pointer;
+    margin-top: 0;
+}
+
+.gallery-title-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.gallery-title-display {
+    font-size: 6em;
+    font-weight: 300;
+    margin-bottom: 32px;
+    letter-spacing: 8px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    margin: 0;
+}
+
+.gallery-title-input {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 3em;
+    font-weight: 300;
+    text-align: center;
+    padding: 16px 24px;
+    border-radius: 8px;
+    min-width: 400px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    transition: all 0.3s;
+    margin: 0;
+}
+
+.gallery-title-input:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.edit-title-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    margin-left: 16px;
+    padding: 0;
+    transition: opacity 0.3s ease;
+}
+
+.edit-title-btn:hover {
+    opacity: 0.7;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.view-gallery-link {
+    margin-top: 8px;
+}
+
+.view-gallery-text {
+    color: white;
+    margin-top: 16px;
+    text-decoration: underline;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    transition: opacity 0.3s ease;
+}
+
+.view-gallery-text:hover {
+    opacity: 0.7;
+}
+
+.cover-info {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px 30px;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 2px solid white;
+}
+
+.cover-info-content {
+    text-align: center;
+}
+
+.cover-info-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.cover-info-subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: #666;
+    letter-spacing: 0.3px;
+}
+
+.hero-action-btn {
+    display: inline-block;
+    padding: 16px 48px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.hero-action-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.hero-action-btn.secondary {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: none;
+}
+
+.hero-action-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+}
+
+.hero {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 80px 40px 60px;
+    background: radial-gradient(
+        ellipse at top,
+        rgba(0, 0, 0, 0.05) 0%,
+        transparent 60%
+    );
+    position: relative;
+}
+
+.date {
+    font-size: 1em;
+    margin-bottom: 40px;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 300;
+}
+
+.photo-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    font-size: 0.95em;
+    color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+}
+
+.upload-section {
+    padding: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.upload-area {
+    border: 2px dashed rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    padding: 80px 40px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(0, 0, 0, 0.02);
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.04);
+    transform: translateY(-4px);
+}
+
+.upload-area.dragover {
+    border-color: rgba(100, 200, 255, 0.5);
+    background: rgba(100, 200, 255, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 56px;
+    margin-bottom: 24px;
+    opacity: 0.8;
+}
+
+.upload-text {
+    font-size: 20px;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 12px;
+    font-weight: 400;
+}
+
+.upload-subtext {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.4);
+    font-weight: 300;
+}
+
+#fileInput {
+    display: none;
+}
+
+.preview-section {
+    margin-top: 50px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.preview-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.9);
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.preview-item {
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.03);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.preview-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-remove {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 2;
+}
+
+.preview-item:hover .preview-remove {
+    opacity: 1;
+}
+
+.preview-remove:hover {
+    background: rgba(220, 53, 69, 0.9);
+    transform: scale(1.1);
+}
+
+.preview-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(0, 0, 0, 0.9) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.preview-item:hover .preview-info {
+    opacity: 1;
+}
+
+.preview-filename {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.preview-size {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.add-photos-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 16px 48px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 32px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.add-photos-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+}
+
+.gallery-container {
+    margin: 0 auto;
+    padding: 0;
+}
+
+.gallery-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+/* UPDATED GALLERY LAYOUT - Masonry style với ảnh khít nhau */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 4px;
+    grid-auto-rows: 180px;
+    grid-auto-flow: dense;
+    padding: 0;
+}
+
+@media (max-width: 1200px) {
+    .gallery {
+        grid-template-columns: repeat(8, 1fr);
+        grid-auto-rows: 160px;
+        gap: 3px;
+    }
+}
+
+@media (max-width: 768px) {
+    .gallery-title-display {
+        font-size: 3em;
+        letter-spacing: 4px;
+    }
+
+    .gallery-title-input {
+        font-size: 2.5em;
+        min-width: 300px;
+        padding: 12px 16px;
+        letter-spacing: 2px;
+    }
+
+    .gallery-title-section {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .edit-title-btn {
+        font-size: 14px;
+        margin-left: 12px;
+    }
+
+    .hero-actions {
+        gap: 12px;
+    }
+
+    .view-gallery-text {
+        font-size: 13px;
+    }
+
+    .cover-info {
+        padding: 16px 24px;
+        margin: 16px 0;
+    }
+
+    .cover-info-title {
+        font-size: 14px;
+    }
+
+    .cover-info-subtitle {
+        font-size: 12px;
+    }
+
+    .hero-banner-btn,
+    .hero-action-btn {
+        padding: 12px 32px;
+        font-size: 12px;
+    }
+
+    .hero-logo {
+        width: 60px;
+        height: 60px;
+        padding: 6px;
+    }
+
+    .gallery {
+        grid-template-columns: repeat(4, 1fr);
+        grid-auto-rows: 140px;
+        gap: 3px;
+    }
+}
+
+/* UPDATED PHOTO ITEMS - Không bo góc, layout tự nhiên hơn */
+.photo-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.9);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.photo-item.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.photo-item.drag-over {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 2px rgba(100, 200, 255, 0.5);
+}
+
+.photo-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.photo-item:hover img {
+    transform: scale(1.08);
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0.8) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.photo-item:hover .photo-overlay {
+    opacity: 1;
+}
+
+.photo-number {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.photo-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.photo-action-btn {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.photo-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.photo-action-btn.delete:hover {
+    background: rgba(220, 53, 69, 0.9);
+}
+
+.photo-action-btn.replace:hover {
+    background: rgba(100, 200, 255, 0.9);
+}
+
+/* Quick Preview on Hover */
+.quick-preview {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    max-width: 600px;
+    max-height: 80vh;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-preview.active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.quick-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Lightbox */
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.98);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    z-index: 10000;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.lightbox-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(90deg);
+}
+
+.lightbox-content {
+    max-width: 92%;
+    max-height: 92%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox-image-wrapper {
+    position: relative;
+    max-width: 100%;
+    max-height: 88vh;
+}
+
+.lightbox-content img {
+    max-width: 100%;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    transition: transform 0.3s;
+    cursor: zoom-in;
+}
+
+.lightbox-content img.zoomed {
+    cursor: zoom-out;
+    transform: scale(2);
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    user-select: none;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    z-index: 10001;
+}
+
+.lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.lightbox-prev {
+    left: 40px;
+}
+
+.lightbox-next {
+    right: 40px;
+}
+
+.lightbox-info {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    padding: 16px 32px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.lightbox-counter {
+    color: white;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.lightbox-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.lightbox-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 6px 12px;
+    transition: all 0.3s;
+    opacity: 0.7;
+    border-radius: 8px;
+}
+
+.lightbox-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.15);
+}
+
+/* Slideshow */
+.slideshow-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+}
+
+.slideshow-overlay.active {
+    display: flex;
+}
+
+.slideshow-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slideshow-image {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slideshow-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    padding: 16px 32px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slideshow-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.slideshow-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px 40px;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.empty-state-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: 18px;
+    font-weight: 300;
+}

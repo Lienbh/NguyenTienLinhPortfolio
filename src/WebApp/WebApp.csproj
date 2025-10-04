@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <Folder Include="Configuration\" />
+    <Folder Include="wwwroot\assets\gallery\" />
     <Folder Include="wwwroot\L\" />
   </ItemGroup>
 

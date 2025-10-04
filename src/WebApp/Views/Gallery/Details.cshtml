@@ -1,0 +1,261 @@
+@model BuildingBlock.DTOS.GalleryDTO
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/gallery-details.css" />
+<!-- Gallery Banner -->
+@if (!string.IsNullOrEmpty(Model.BannerImagePath))
+{
+    <div class="gallery-banner">
+        <div class="banner-image">
+            <img src="~/assets/gallery/@Model.BannerImagePath" alt="@Model.BannerImageName" class="img-fluid">
+            <div class="banner-overlay">
+                <div class="banner-content">
+                  
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            @if (string.IsNullOrEmpty(Model.BannerImagePath))
+            {
+                <div class="page-title-box">
+                    <h4 class="page-title">@Model.Title</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Home</a></li>
+                            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Gallery")">Gallery</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+                        </ol>
+                    </nav>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Description) && string.IsNullOrEmpty(Model.BannerImagePath))
+            {
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="card-text">@Model.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Gallery Actions -->
+            <div class="gallery-actions mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary active" onclick="toggleView('masonry')"
+                                id="masonryViewBtn">
+                                <i class="fas fa-th"></i> Masonry
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="toggleView('grid')" id="gridViewBtn">
+                                <i class="fas fa-th-large"></i> Grid
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-info" onclick="toggleSlideshow()">
+                                <i class="fas fa-play"></i> Slideshow
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="shareGallery()">
+                                <i class="fas fa-share"></i> Share
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div class="gallery-grid masonry-layout" id="galleryGrid">
+                <!-- Grid sizer for Masonry layout -->
+                <div class="grid-sizer"></div>
+
+                @if (Model.GalleryItems != null && Model.GalleryItems.Any())
+                {
+                    @foreach (var item in Model.GalleryItems.OrderBy(gi => gi.DisplayOrder))
+                    {
+                        <div class="gallery-item" data-id="@item.IdGalleryItem">
+                            <div class="gallery-item-image">
+                                <img src="~/assets/gallery/@item.ImagePath" alt="@item.ImageName" class="img-fluid"
+                                    onclick="openLightbox('@item.ImagePath', '@item.ImageName', '@item.Description')">
+                                <div class="gallery-item-overlay">
+                                    <div class="gallery-item-actions">
+                                        <button class="btn btn-sm btn-light"
+                                            onclick="openLightbox('@item.ImagePath', '@item.ImageName', '@item.Description')">
+                                            <i class="fas fa-expand"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <div class="gallery-item-caption">
+                                    <p class="small">@item.Description</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="text-center">
+                            <i class="fas fa-images fa-5x text-muted mb-3"></i>
+                            <h4 class="text-muted">No Images Found</h4>
+                            <p class="text-muted">This gallery doesn't have any images yet.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="imageModalLabel"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid">
+                <p id="modalDescription" class="text-white mt-3"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+<script>
+    let masonryInstance = null;
+    let currentView = 'masonry';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeMasonry();
+
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('imageModalLabel');
+        const modalDescription = document.getElementById('modalDescription');
+
+        imageModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const imageSrc = button.getAttribute('data-bs-src');
+            const imageTitle = button.getAttribute('data-bs-title');
+            const imageDescription = button.getAttribute('data-bs-description');
+
+            modalImage.src = imageSrc;
+            modalTitle.textContent = imageTitle || 'Image';
+            modalDescription.textContent = imageDescription || '';
+        });
+    });
+
+    function initializeMasonry() {
+        const grid = document.getElementById('galleryGrid');
+        if (grid && currentView === 'masonry') {
+            // Initialize Masonry with proper options
+            masonryInstance = new Masonry(grid, {
+                itemSelector: '.gallery-item',
+                columnWidth: '.grid-sizer',
+                percentPosition: true,
+                gutter: 20
+            });
+
+            // Layout Masonry after images load
+            const images = grid.querySelectorAll('img');
+            let loadedImages = 0;
+
+            images.forEach(img => {
+                if (img.complete) {
+                    loadedImages++;
+                } else {
+                    img.addEventListener('load', () => {
+                        loadedImages++;
+                        if (loadedImages === images.length && masonryInstance) {
+                            masonryInstance.layout();
+                        }
+                    });
+                }
+            });
+
+            // If all images already loaded
+            if (loadedImages === images.length && masonryInstance) {
+                masonryInstance.layout();
+            }
+        }
+    }
+
+    function toggleView(view) {
+        currentView = view;
+        const grid = document.getElementById('galleryGrid');
+        const masonryBtn = document.getElementById('masonryViewBtn');
+        const gridBtn = document.getElementById('gridViewBtn');
+
+        if (view === 'masonry') {
+            grid.className = 'gallery-grid masonry-layout';
+            masonryBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+
+            // Destroy existing instance
+            if (masonryInstance) {
+                masonryInstance.destroy();
+                masonryInstance = null;
+            }
+
+            // Initialize Masonry
+            setTimeout(() => {
+                initializeMasonry();
+            }, 100);
+        } else {
+            grid.className = 'gallery-grid grid-layout';
+            gridBtn.classList.add('active');
+            masonryBtn.classList.remove('active');
+
+            // Destroy Masonry instance
+            if (masonryInstance) {
+                masonryInstance.destroy();
+                masonryInstance = null;
+            }
+        }
+    }
+
+    function openLightbox(imagePath, title, description) {
+        document.getElementById('modalImage').src = `/assets/gallery/${imagePath}`;
+        document.getElementById('imageModalLabel').textContent = title || 'Image';
+        document.getElementById('modalDescription').textContent = description || '';
+
+        const lightboxModal = new bootstrap.Modal(document.getElementById('imageModal'));
+        lightboxModal.show();
+    }
+
+    function toggleSlideshow() {
+        // Implement slideshow functionality
+        alert('Slideshow feature coming soon!');
+    }
+
+    function shareGallery() {
+        if (navigator.share) {
+            navigator.share({
+                title: '@Model.Title',
+                text: '@Model.Description',
+                url: window.location.href
+            });
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert('Gallery link copied to clipboard!');
+        }
+    }
+</script>

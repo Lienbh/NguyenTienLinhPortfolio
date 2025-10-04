@@ -28,6 +28,8 @@ namespace NguyenTienLinh.Context
         public DbSet<BackGround> BackGround { get; set; }
 
         public DbSet<About> About { get; set; }
+        public DbSet<Gallery> Galleries { get; set; }
+        public DbSet<GalleryItem> GalleryItems { get; set; }
     }
 
 }

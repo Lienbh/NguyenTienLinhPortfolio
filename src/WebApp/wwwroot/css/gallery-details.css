@@ -1,0 +1,272 @@
+/* Gallery Details Styles */
+
+/* Gallery Banner Styles */
+.gallery-banner {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.banner-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.banner-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-content {
+    text-align: center;
+    color: white;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.banner-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.banner-subtitle {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.banner-description {
+    font-size: 1.1rem;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Gallery Actions */
+.gallery-actions {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Gallery Grid Styles */
+.gallery-grid {
+    margin-top: 2rem;
+}
+
+/* Masonry Layout - Responsive 5 columns */
+.gallery-grid::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.grid-sizer,
+.gallery-item {
+    width: 20%; /* 5 columns */
+    float: left;
+}
+
+.gallery-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.gallery-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Grid Layout - Fallback */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.grid-layout .gallery-item {
+    width: auto;
+    float: none;
+    margin-bottom: 0;
+}
+
+.gallery-item-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.gallery-item-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-item-image img {
+    transform: scale(1.05);
+}
+
+.gallery-item-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .gallery-item-overlay {
+    opacity: 1;
+}
+
+.gallery-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.gallery-item-caption {
+    padding: 1rem;
+}
+
+.gallery-item-caption p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .grid-sizer,
+    .gallery-item {
+        width: 25%; /* 4 columns */
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-sizer,
+    .gallery-item {
+        width: 50%; /* 2 columns */
+    }
+
+    .gallery-container {
+        padding: 20px 16px 60px;
+    }
+
+    .gallery-item {
+        margin-bottom: 8px;
+    }
+
+    .banner-title {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+    }
+
+    .banner-subtitle {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+
+    .banner-description {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    .gallery-banner {
+        height: 40vh;
+        min-height: 250px;
+        padding: 20px;
+    }
+
+    .banner-overlay {
+        padding: 20px;
+    }
+
+    .view-toggle {
+        margin-bottom: 20px;
+    }
+
+    .view-toggle button {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-sizer,
+    .gallery-item {
+        width: 50%; /* 2 columns */
+    }
+
+    .gallery-container {
+        padding: 16px 12px 40px;
+    }
+
+    .gallery-item {
+        margin-bottom: 6px;
+    }
+
+    .banner-title {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+    }
+
+    .banner-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+
+    .banner-description {
+        font-size: 0.8rem;
+        margin-bottom: 15px;
+    }
+
+    .gallery-banner {
+        height: 35vh;
+        min-height: 200px;
+        padding: 16px;
+    }
+
+    .banner-overlay {
+        padding: 16px;
+    }
+
+    .view-toggle {
+        margin-bottom: 16px;
+    }
+
+    .view-toggle button {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+}

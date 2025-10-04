@@ -7,17 +7,39 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NguyenTienLinh.Context;
 using System.Text;
+using NguyenTienLinh.Repository;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.IISIntegration;
 
 namespace NguyenTienLinh
 {
     public class Program
     {
-        
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
+            // Configure request body size limits
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = null; // No limit
+            });
+
+            builder.Services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = null; // No limit
+            });
+
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = long.MaxValue; // No limit
+                options.ValueLengthLimit = int.MaxValue; // No limit
+                options.ValueCountLimit = int.MaxValue; // No limit
+            });
 
             //gọi đến login controller
             builder.Services.AddControllersWithViews();
@@ -36,6 +58,7 @@ namespace NguyenTienLinh
             builder.Services.AddTransient<IVideosRepo, VideoRepo>();
             builder.Services.AddTransient<IUserRepo, UserRepo>();
             builder.Services.AddTransient<IBackGroundsRepo, BackGroundRepo>();
+            builder.Services.AddTransient<IGalleryRepo, GalleryRepo>();
 
 
 
@@ -43,14 +66,14 @@ namespace NguyenTienLinh
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddCors(option =>
+            builder.Services.AddCors(options =>
             {
-                option.AddPolicy("AllowForntend",
-                    builder =>
+                options.AddPolicy("AllowFrontend",
+                    policy =>
                     {
-                        builder.WithOrigins("http://localhost:5173")
-                               .AllowAnyHeader()
-                               .AllowAnyMethod();
+                        policy.AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
                     });
             });
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -77,18 +100,15 @@ namespace NguyenTienLinh
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
-        
+
     }
 }

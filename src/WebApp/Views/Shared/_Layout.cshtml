@@ -14,8 +14,9 @@
 </head>
 @{
     var userName = (string)TempData["currentUser"];
-    
+
 }
+
 <body>
     <header>
         <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light shadow">
@@ -27,30 +28,40 @@
                     NGUYENTIENLINH
                 </a>
                 <button class="navbar-toggler collasped" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
-                        aria-label="Toggle navigation">
+                    data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
-                </button>                                       
+                </button>
                 <span class="navbar-collapse collapse" id="navbarCollapse">
                     <ul class="navbar-nav ms-auto mb-2 mb-md-0 text-center">
-                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Home" asp-action="Index">
+                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Home"
+                            asp-action="Index">
                             <span class="nav-link pe-2 pe-lg-5">
                                 HOME
                             </span>
                         </a>
-                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="MyWork" asp-action="Index">
-                            <span class="nav-link pe-2 pe-lg-5" >
+                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="MyWork"
+                            asp-action="Index">
+                            <span class="nav-link pe-2 pe-lg-5">
                                 MY WORK
                             </span>
                         </a>
-                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="AboutMe" asp-action="Index">
+                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="AboutMe"
+                            asp-action="Index">
                             <span class="nav-link pe-2 pe-lg-5">
                                 ABOUT ME
                             </span>
                         </a>
+                        <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Gallery"
+                            asp-action="Index">
+                            <span class="nav-link pe-2 pe-lg-5">
+                                GALLERY
+                            </span>
+                        </a>
                         @if (!string.IsNullOrEmpty(userName))
                         {
-                            <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Category" asp-action="Manage">
+                            <a class="nav-item" style="text-decoration:none" asp-area="" asp-controller="Category"
+                                asp-action="Manage">
                                 <span class="nav-link pe-2 pe-lg-5">
                                     MANAGE CATEGORY
                                 </span>
@@ -65,7 +76,7 @@
                         {
                             <a class="nav-item" style="text-decoration:none" asp-controller="Login" asp-action="Index">
                                 <span class="nav-link pe-2 pe-lg-5">
-                                  LOGIN
+                                    LOGIN
                                 </span>
                             </a>
                         }
@@ -77,7 +88,7 @@
     </header>
     <div class="main-body">
         <main role="main" class="pb-3">
-          <div class="body-section">@RenderBody()</div>
+            <div class="body-section">@RenderBody()</div>
         </main>
     </div>
 
@@ -94,27 +105,32 @@
             <div class="px-3 pt-3 d-flex order-md-3 order-3">
                 <div class="px-2">
                     <a href="https://www.facebook.com/ltnguyen198">
-                        <img src="~/assets/footer-icon-link/2021_Facebook_icon.svg.png" alt="" style="width: 32px" loading="lazy" />
+                        <img src="~/assets/footer-icon-link/2021_Facebook_icon.svg.png" alt="" style="width: 32px"
+                            loading="lazy" />
                     </a>
                 </div>
                 <div class="px-2">
                     <a href="https://www.youtube.com/channel/UCZVfd9rhMUgZT9V6nBsfabw">
-                        <img src="~/assets/footer-icon-link/youtube-logo.webp" alt="" style="width: 32px" loading="lazy" />
+                        <img src="~/assets/footer-icon-link/youtube-logo.webp" alt="" style="width: 32px"
+                            loading="lazy" />
                     </a>
                 </div>
                 <div class="px-2" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#exampleModal">
                     <span>
-                        <img src="~/assets/footer-icon-link/Icon_of_Zalo.svg.webp" alt="" style="width: 32px" loading="lazy" />
+                        <img src="~/assets/footer-icon-link/Icon_of_Zalo.svg.webp" alt="" style="width: 32px"
+                            loading="lazy" />
                     </span>
                 </div>
-                 <div class="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel"
+                    aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="exampleModalLabel">
                                     Connect with me
                                 </h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <img src="~/assets/ntlinh/zalo-qr.jpg" alt="" style="width: 100% " />
@@ -126,22 +142,22 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
     </footer>
     <script src="~/js/sweetalert.min.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-<script>
-        document.addEventListener('DOMContentLoaded', function() {
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             const navbarToggler = document.querySelector('.navbar-toggler');
             const mainBody = document.querySelector('.main-body');
 
-            navbarToggler.addEventListener('click', function() {
+            navbarToggler.addEventListener('click', function () {
                 if (navbarToggler.classList.contains('collapsed')) {
-                   
+
                     mainBody.style.marginTop = '0';
                 } else {
                     mainBody.style.marginTop = '210px';

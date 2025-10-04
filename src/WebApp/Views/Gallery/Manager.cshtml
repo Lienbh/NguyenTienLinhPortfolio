@@ -1,0 +1,1097 @@
+@model BuildingBlock.DTOS.GalleryDTO
+@{
+    ViewData["Title"] = $"{Model.Title}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var apiUrl = ViewBag.ApiUrl;
+}
+<link rel="stylesheet" href="~/css/gallery-manager.css" />
+
+<!-- Hero Banner -->
+<div class="hero-banner" id="heroBanner">
+    <div class="coverage">
+        <img id="heroBannerImg" class="hero-banner-bg"
+            src="@apiUrl/assets/gallery/@Model.IdGallery/@Model.BannerImagePath" alt="Banner">
+        <div class="hero-banner-content">
+            <div class="hero-logo">
+                <img src="~/assets/Logo/L2.png" alt="Logo" />
+            </div>
+            <div class="gallery-title-section">
+                <div id="galleryTitleDisplay" class="gallery-title-display">@Model.Title.ToUpper()</div>
+                <input type="text" id="galleryTitleInput" class="gallery-title-input" value="@Model.Title"
+                    placeholder="Nhập tên Gallery" style="display: none;">
+                <button class="edit-title-btn" onclick="toggleTitleEdit()" title="Chỉnh sửa tên">✏️</button>
+            </div>
+            <div class="date">@Model.CreatedDate.ToString("dd/MM/yyyy")</div>
+            <div class="dflex justify-content-center">
+                <div class="photo-count">
+                    <span>📸</span>
+                    <span id="photoCount">@Model.GalleryItems.Count</span> Photos
+                </div>
+            </div>
+            <div class="hero-actions">
+                <button class="hero-banner-btn" onclick="document.getElementById('bannerInput').click()">
+                    CHỌN ẢNH BANNER
+                </button>
+
+
+                <button class="hero-action-btn" id="saveGalleryBtn" onclick="saveGallery()">
+                    @(Model.IdGallery == 0 ? "TẠO GALLERY" : "LƯU GALLERY")
+                </button>
+                @if (Model.IdGallery == 0)
+                {
+                    <button class="hero-action-btn secondary" onclick="window.location.href='/Gallery'">
+                        HỦY
+                    </button>
+                }
+            </div>
+            <div class="view-gallery-link">
+                <a href="#" class="view-gallery-text">View Gallery</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+<input type="file" id="bannerInput" accept="image/*" style="display: none;">
+
+
+<div class="upload-section">
+    <div class="upload-area" id="uploadArea">
+        <div class="upload-icon text-center">📸</div>
+        <div class="upload-text text-center">Kéo thả ảnh vào đây hoặc click để chọn</div>
+    </div>
+    <input type="file" id="fileInput" multiple accept="image/*">
+
+    <div class="preview-section" id="previewSection" style="display: none;">
+        <div class="preview-header">
+            <div class="preview-title"><span id="previewCount">0</span> ảnh đã chọn</div>
+            <div class="processing-indicator" id="processingIndicator" style="display: none;">
+                <span class="spinner"></span>
+                <span>Đang xử lý ảnh...</span>
+            </div>
+        </div>
+        <div class="preview-grid" id="previewGrid"></div>
+        <center>
+            <button class="add-photos-btn" id="addPhotosBtn">
+                Thêm vào Gallery
+            </button>
+        </center>
+    </div>
+</div>
+
+<div class="section-divider"></div>
+
+<div class="gallery-container">
+    <div class="gallery" id="gallery">
+        @if (Model.GalleryItems != null && Model.GalleryItems.Any())
+        {
+            @foreach (var item in Model.GalleryItems.OrderBy(x => x.DisplayOrder))
+            {
+                <div class="photo-item" data-id="@item.IdGalleryItem">
+                    <img src="@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath" alt="@item.ImageName">
+                    <div class="photo-overlay">
+                        <span class="photo-number">#@item.DisplayOrder.ToString("00")</span>
+                        <div class="photo-actions">
+                            <button class="photo-action-btn replace" onclick="replacePhoto(@item.IdGalleryItem)"
+                                title="Thay thế">🔄</button>
+                            <button class="photo-action-btn delete" onclick="deletePhoto(@item.IdGalleryItem)"
+                                title="Xóa">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+</div>
+<div class="quick-preview" id="quickPreview">
+    <img id="quickPreviewImg" src="" alt="">
+</div>
+<div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightbox-close">×</span>
+    <span class="lightbox-nav lightbox-prev" id="lightbox-prev">‹</span>
+    <div class="lightbox-content">
+        <div class="lightbox-image-wrapper">
+            <img id="lightbox-img" src="" alt="">
+        </div>
+    </div>
+    <span class="lightbox-nav lightbox-next" id="lightbox-next">›</span>
+    <div class="lightbox-info">
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+        <div class="lightbox-actions">
+            <button class="lightbox-btn" id="zoomBtn" title="Zoom">🔍</button>
+            <button class="lightbox-btn" title="Yêu thích">❤️</button>
+            <button class="lightbox-btn" title="Tải xuống">📥</button>
+            <button class="lightbox-btn" title="Chia sẻ">📤</button>
+        </div>
+    </div>
+</div>
+
+<!-- Slideshow -->
+<div class="slideshow-overlay" id="slideshowOverlay">
+    <span class="lightbox-close" id="slideshow-close" style="top: 32px; right: 32px;">×</span>
+    <div class="slideshow-content">
+        <img id="slideshow-img" class="slideshow-image" src="" alt="">
+    </div>
+    <div class="slideshow-controls">
+        <button class="slideshow-btn" id="slideshow-play">⏸️ Tạm dừng</button>
+        <span id="slideshow-counter" style="color: white; font-size: 14px;">1 / 10</span>
+        <button class="slideshow-btn" id="slideshow-speed">Tốc độ: 3s</button>
+    </div>
+</div>
+
+<input type="file" id="replaceInput" accept="image/*" style="display: none;">
+
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const replaceInput = document.getElementById('replaceInput');
+    const previewSection = document.getElementById('previewSection');
+    const previewGrid = document.getElementById('previewGrid');
+    const previewCount = document.getElementById('previewCount');
+    const addPhotosBtn = document.getElementById('addPhotosBtn');
+    const processingIndicator = document.getElementById('processingIndicator');
+    const gallery = document.getElementById('gallery');
+    const photoCount = document.getElementById('photoCount');
+    const quickPreview = document.getElementById('quickPreview');
+    const quickPreviewImg = document.getElementById('quickPreviewImg');
+    const bannerInput = document.getElementById('bannerInput');
+    const heroBannerImg = document.getElementById('heroBannerImg');
+
+    let photos = [];
+    let previewPhotos = [];
+    let previewMetadata = [];
+    let draggedIndex = null;
+    let replaceIndex = null;
+    let currentPhotoIndex = 0;
+    let isZoomed = false;
+    let slideshowIndex = 0;
+    let slideshowSpeed = 3000;
+    let slideshowInterval = null;
+    let quickPreviewTimeout = null;
+    let isTitleEditing = false;
+
+    // Banner variables
+    let bannerFile = null;
+    let bannerImagePath = '@Model.BannerImagePath';
+    let bannerImageName = '@Model.BannerImageName';
+
+    // Title editing functionality
+    function toggleTitleEdit() {
+        const titleDisplay = document.getElementById('galleryTitleDisplay');
+        const titleInput = document.getElementById('galleryTitleInput');
+        const editBtn = document.querySelector('.edit-title-btn');
+
+        if (isTitleEditing) {
+            // Save title
+            saveTitle();
+        } else {
+            // Enable editing
+            titleInput.value = titleDisplay.textContent;
+            titleInput.style.display = 'block';
+            titleDisplay.style.display = 'none';
+            titleInput.focus();
+            titleInput.select();
+            editBtn.textContent = '💾';
+            editBtn.title = 'Lưu tên';
+            isTitleEditing = true;
+        }
+    }
+
+    function saveTitle() {
+        const titleDisplay = document.getElementById('galleryTitleDisplay');
+        const titleInput = document.getElementById('galleryTitleInput');
+        const editBtn = document.querySelector('.edit-title-btn');
+
+        const newTitle = titleInput.value.trim();
+        if (newTitle) {
+            titleDisplay.textContent = newTitle.toUpperCase();
+
+            // Update gallery title if changed
+            if (newTitle !== '@Model.Title') {
+                // Title changed, will be saved when clicking main save button
+            }
+        }
+
+        // Hide input, show display
+        titleInput.style.display = 'none';
+        titleDisplay.style.display = 'block';
+        editBtn.textContent = '✏️';
+        editBtn.title = 'Chỉnh sửa tên';
+        isTitleEditing = false;
+    }
+
+    // Auto-save title when clicking outside input
+    document.addEventListener('click', (e) => {
+        const titleInput = document.getElementById('galleryTitleInput');
+        const editBtn = document.querySelector('.edit-title-btn');
+
+        if (isTitleEditing && !titleInput.contains(e.target) && !editBtn.contains(e.target)) {
+            saveTitle();
+        }
+    });
+
+    // Auto-save title on Enter key
+    document.getElementById('galleryTitleInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            saveTitle();
+        }
+    });
+
+    // Gallery save functionality - Using granular changes tracking
+    async function saveGallery() {
+        const titleDisplay = document.getElementById('galleryTitleDisplay');
+        const saveBtn = document.getElementById('saveGalleryBtn');
+        const originalText = saveBtn.textContent;
+
+        // Validation: Check if there's at least 1 photo
+        if (photos.length === 0) {
+            alert('Vui lòng thêm ít nhất 1 ảnh vào Gallery!');
+            return;
+        }
+
+        // Validation: Check if there's a banner image (only for new galleries)
+        if (@Model.IdGallery == 0 && !bannerFile) {
+            alert('Vui lòng chọn ảnh bìa cho Gallery!');
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'ĐANG LƯU...';
+
+        try {
+            const formData = new FormData();
+            formData.append('Title', titleDisplay.textContent);
+            formData.append('Description', '@Model.Description');
+
+            // Add banner if provided
+            if (bannerFile) {
+                formData.append('BannerImage', bannerFile);
+            }
+
+            if (@Model.IdGallery == 0) {
+                // Create new gallery - use simple approach
+                photos.forEach((photo, index) => {
+                    if (photo.file) {
+                        formData.append('GalleryImages', photo.file);
+                    }
+                });
+
+                const response = await fetch('@apiUrl/api/Gallery/create-with-files', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    window.location.href = `/Gallery/Manager/${result.galleryId}`;
+                } else {
+                    throw new Error(result.message || 'Failed to create gallery');
+                }
+            } else {
+                // Update existing gallery - use granular changes
+
+                // Detect reorder changes by comparing current vs original order
+                detectReorderChanges();
+
+                console.log('=== SAVING GALLERY CHANGES ===');
+                console.log('Changes object:', changes);
+                console.log('Added photos:', changes.added.length);
+                console.log('Updated photos:', changes.updated.length);
+                console.log('Deleted photos:', changes.deleted.length);
+                console.log('Reordered photos:', changes.reordered.length);
+
+                // Add photos to add
+                changes.added.forEach((add, index) => {
+                    console.log('Adding photo to formData:', add.file.name, 'displayOrder:', add.displayOrder);
+                    formData.append('PhotosToAdd', add.file);
+                    formData.append('PhotosToAddDisplayOrder', add.displayOrder);
+                });
+
+                // Add photos to update
+                changes.updated.forEach((update, index) => {
+                    formData.append('PhotosToUpdate', update.newFile);
+                    formData.append('PhotosToUpdatePhotoId', update.photoId);
+                    formData.append('PhotosToUpdateDisplayOrder', update.displayOrder);
+                });
+
+                // Add photos to delete
+                changes.deleted.forEach((photoId, index) => {
+                    formData.append('PhotosToDelete', photoId);
+                });
+
+                // Add photos to reorder
+                changes.reordered.forEach((reorder, index) => {
+                    console.log('Reordering photo:', reorder.photoId, 'to order:', reorder.newOrder);
+                    formData.append('PhotosToReorderPhotoId', reorder.photoId);
+                    formData.append('PhotosToReorderNewOrder', reorder.newOrder);
+                });
+
+                const response = await fetch('@apiUrl/api/Gallery/update-with-changes/@Model.IdGallery', {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+
+                const result = await response.json();
+                console.log('Response result:', result);
+
+                if (result.success) {
+                    alert('Gallery đã được cập nhật thành công!');
+                    // Reset changes and reload
+                    resetChanges();
+                    window.location.reload();
+                } else {
+                    throw new Error(result.message || 'Failed to update gallery');
+                }
+            }
+        } catch (error) {
+            console.error('Save gallery error:', error);
+            alert('Có lỗi xảy ra khi lưu Gallery. Vui lòng thử lại.');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+        }
+    }
+
+    // Banner upload logic
+    bannerInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            compressImage(file, (compressedDataUrl, metadata) => {
+                bannerFile = metadata.file; // Use compressed file
+                bannerImageName = metadata.name;
+
+                heroBannerImg.src = compressedDataUrl;
+                setTimeout(() => {
+                    heroBannerImg.classList.add('loaded');
+                }, 100);
+            });
+        }
+    };
+
+
+    // Move photos from general folder to gallery folder
+    async function movePhotosToGalleryFolder(uploadedPhotos, galleryId) {
+        try {
+            const response = await fetch('@apiUrl/api/Upload/move-photos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    photos: uploadedPhotos.map(photo => photo.uploadedPath),
+                    galleryId: galleryId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to move photos to gallery folder');
+            }
+        } catch (error) {
+            console.error('Move photos error:', error);
+            throw error;
+        }
+    }
+
+    // Rollback uploaded files if database operation fails
+    async function rollbackUploadedFiles(bannerPath, uploadedPhotos) {
+        try {
+            const filesToDelete = [];
+
+            if (bannerPath) {
+                filesToDelete.push(bannerPath);
+            }
+
+            if (uploadedPhotos && uploadedPhotos.length > 0) {
+                uploadedPhotos.forEach(photo => {
+                    if (photo.uploadedPath) {
+                        filesToDelete.push(photo.uploadedPath);
+                    }
+                });
+            }
+
+            if (filesToDelete.length > 0) {
+                const response = await fetch('@apiUrl/api/Upload/rollback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ files: filesToDelete })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to rollback uploaded files');
+                }
+            }
+        } catch (error) {
+            console.error('Rollback error:', error);
+        }
+    }
+
+    // Upload banner to general folder (for new galleries)
+    async function uploadBannerToGeneral(file) {
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch('@apiUrl/api/Upload/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                return result.fileName;
+            } else {
+                throw new Error('Banner upload failed');
+            }
+        } catch (error) {
+            console.error('Banner upload error:', error);
+            throw error;
+        }
+    }
+
+    // Move banner from general folder to gallery folder
+    async function moveBannerToGalleryFolder(bannerPath, galleryId) {
+        try {
+            const response = await fetch('@apiUrl/api/Upload/move-banner', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    bannerPath: bannerPath,
+                    galleryId: galleryId
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to move banner to gallery folder');
+            }
+        } catch (error) {
+            console.error('Move banner error:', error);
+            throw error;
+        }
+    }
+
+    // Update gallery banner path in database
+    async function updateGalleryBanner(galleryId, bannerPath) {
+        try {
+            const response = await fetch('@apiUrl/api/Gallery/' + galleryId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    IdGallery: galleryId,
+                    Title: document.getElementById('galleryTitleDisplay').textContent,
+                    Description: '@Model.Description',
+                    BannerImagePath: bannerPath,
+                    BannerImageName: bannerPath
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update gallery banner');
+            }
+        } catch (error) {
+            console.error('Update gallery banner error:', error);
+            throw error;
+        }
+    }
+
+    // Initialize banner if exists
+    @if (!string.IsNullOrEmpty(Model.BannerImagePath))
+        {
+            <text>
+                heroBannerImg.classList.add('loaded');
+            </text>
+    }
+
+const layoutPatterns = [
+        { col: 4, row: 3 },
+        { col: 3, row: 4 },
+        { col: 5, row: 3 },
+        { col: 3, row: 3 },
+        { col: 3, row: 4 },
+        { col: 4, row: 3 },
+        { col: 4, row: 4 },
+        { col: 5, row: 3 },
+        { col: 3, row: 5 },
+        { col: 6, row: 3 }
+    ];
+
+    uploadArea.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => handleFiles(e.target.files);
+
+    uploadArea.ondragover = (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    };
+
+    uploadArea.ondragleave = () => {
+        uploadArea.classList.remove('dragover');
+    };
+
+    uploadArea.ondrop = (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    };
+
+    function handleFiles(files) {
+        previewPhotos = [];
+        previewMetadata = [];
+        previewGrid.innerHTML = '';
+
+        // Hide add button initially and show processing indicator
+        addPhotosBtn.style.display = 'none';
+        processingIndicator.style.display = 'flex';
+
+        let processedCount = 0;
+        const totalFiles = Array.from(files).filter(file => file.type.startsWith('image/')).length;
+
+        Array.from(files).forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                compressImage(file, (compressedDataUrl, metadata) => {
+                    previewPhotos.push(compressedDataUrl);
+                    previewMetadata.push(metadata);
+                    addPreview(compressedDataUrl, previewPhotos.length - 1, metadata);
+                    previewCount.textContent = previewPhotos.length;
+
+                    processedCount++;
+
+                    // Show add button when all images are processed
+                    if (processedCount === totalFiles) {
+                        processingIndicator.style.display = 'none';
+                        addPhotosBtn.style.display = 'block';
+                    }
+                });
+            }
+        });
+
+        if (files.length > 0) {
+            previewSection.style.display = 'block';
+        }
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function compressImage(file, callback) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                // Tính toán kích thước mới (max 1920px chiều rộng)
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 1920;
+                const maxHeight = 1920;
+
+                if (width > maxWidth || height > maxHeight) {
+                    if (width > height) {
+                        height = (height / width) * maxWidth;
+                        width = maxWidth;
+                    } else {
+                        width = (width / height) * maxHeight;
+                        height = maxHeight;
+                    }
+                }
+
+                // Tạo canvas để resize
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+
+                // Vẽ ảnh lên canvas với kích thước mới
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Nén ảnh với quality 0.8 (80%)
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                // Convert base64 to Blob then to File
+                const byteString = atob(compressedDataUrl.split(',')[1]);
+                const mimeString = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' });
+
+                // Tính kích thước trước và sau
+                const originalSize = file.size;
+                const compressedSize = compressedFile.size;
+
+                const metadata = {
+                    name: file.name,
+                    type: 'image/jpeg',
+                    originalSize: originalSize,
+                    compressedSize: compressedSize,
+                    dimensions: { width, height },
+                    file: compressedFile // Store compressed file for upload
+                };
+
+                callback(compressedDataUrl, metadata);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function addPreview(src, index, metadata) {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        previewItem.innerHTML = `
+            <img src="${src}" alt="Preview ${index + 1}">
+            <button class="preview-remove" onclick="removePreview(${index})">×</button>
+            <div class="preview-info">
+                <div class="preview-filename">${metadata.name}</div>
+                <div class="preview-size">${formatFileSize(metadata.compressedSize)} • ${metadata.type.split('/')[1].toUpperCase()}</div>
+            </div>
+        `;
+
+        // Quick preview on hover
+        const img = previewItem.querySelector('img');
+        img.onmouseenter = () => showQuickPreview(src);
+        img.onmouseleave = hideQuickPreview;
+
+        previewGrid.appendChild(previewItem);
+    }
+
+    function showQuickPreview(src) {
+        clearTimeout(quickPreviewTimeout);
+        quickPreviewTimeout = setTimeout(() => {
+            quickPreviewImg.src = src;
+            quickPreview.classList.add('active');
+        }, 500);
+    }
+
+    function hideQuickPreview() {
+        clearTimeout(quickPreviewTimeout);
+        quickPreview.classList.remove('active');
+    }
+
+    window.removePreview = function (index) {
+        previewPhotos.splice(index, 1);
+        previewMetadata.splice(index, 1);
+        updatePreviewGrid();
+
+        if (previewPhotos.length === 0) {
+            previewSection.style.display = 'none';
+        }
+    }
+
+    function updatePreviewGrid() {
+        previewGrid.innerHTML = '';
+        previewPhotos.forEach((src, index) => {
+            addPreview(src, index, previewMetadata[index]);
+        });
+        previewCount.textContent = previewPhotos.length;
+    }
+
+    addPhotosBtn.onclick = () => {
+        if (previewPhotos.length === 0) return;
+
+
+        // Add preview photos to main photos array with file reference
+        previewPhotos.forEach((src, index) => {
+            const newPhoto = {
+                src: src,
+                file: previewMetadata[index].file, // Store original file for upload
+                name: previewMetadata[index].name,
+                imagePath: null, // Will be set after upload
+                imageName: previewMetadata[index].name
+            };
+
+            photos.push(newPhoto);
+
+            // Track added photo
+            trackPhotoAdded(newPhoto);
+        });
+
+
+        updateGallery();
+
+        // Clear preview
+        previewPhotos = [];
+        previewMetadata = [];
+        previewGrid.innerHTML = '';
+        fileInput.value = '';
+        previewSection.style.display = 'none';
+
+        setTimeout(() => {
+            gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    };
+
+    function getLayoutForIndex(index) {
+        return layoutPatterns[index % layoutPatterns.length];
+    }
+
+    async function reloadGallery() {
+        try {
+            const response = await fetch('@apiUrl/api/Gallery/@Model.IdGallery');
+            const galleryData = await response.json();
+
+            // Update photos array with server data
+            photos = galleryData.galleryItems.map(item => ({
+                src: `/assets/gallery/${item.imagePath}`,
+                imagePath: item.imagePath,
+                imageName: item.imageName,
+                name: item.imageName
+            }));
+
+            // Update gallery display
+            updateGallery();
+
+            // Update photo count
+            photoCount.textContent = photos.length;
+
+        } catch (error) {
+            console.error('Reload gallery error:', error);
+        }
+    }
+
+    function updateGallery() {
+        gallery.innerHTML = '';
+
+        photos.forEach((photo, index) => {
+            const layout = getLayoutForIndex(index);
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.draggable = true;
+            photoItem.dataset.index = index;
+
+            // Add data-id if photo has an ID (existing photos from database)
+            if (photo.id) {
+                photoItem.dataset.id = photo.id;
+            }
+
+            photoItem.style.gridColumn = `span ${layout.col}`;
+            photoItem.style.gridRow = `span ${layout.row}`;
+
+            photoItem.innerHTML = `
+                <img src="${photo.src}" alt="Photo ${index + 1}">
+                <div class="photo-overlay">
+                    <span class="photo-number">#${String(index + 1).padStart(2, '0')}</span>
+                    <div class="photo-actions">
+                        <button class="photo-action-btn replace" onclick="replacePhoto(${index})" title="Thay thế">🔄</button>
+                        <button class="photo-action-btn delete" onclick="deletePhoto(${index})" title="Xóa">🗑️</button>
+                    </div>
+                </div>
+            `;
+
+            // Drag and drop events
+            photoItem.ondragstart = (e) => {
+                draggedIndex = index;
+                photoItem.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            photoItem.ondragend = () => {
+                photoItem.classList.remove('dragging');
+            };
+
+            photoItem.ondragover = (e) => {
+                e.preventDefault();
+                photoItem.classList.add('drag-over');
+            };
+
+            photoItem.ondragleave = () => {
+                photoItem.classList.remove('drag-over');
+            };
+
+            photoItem.ondrop = (e) => {
+                e.preventDefault();
+                photoItem.classList.remove('drag-over');
+
+                if (draggedIndex !== null && draggedIndex !== index) {
+                    console.log('=== DRAG & DROP EVENT ===');
+                    console.log('Dragged from index:', draggedIndex, 'to index:', index);
+                    console.log('Dragged photo:', photos[draggedIndex]);
+                    console.log('Target photo:', photos[index]);
+
+                    // Swap photos
+                    const temp = photos[draggedIndex];
+                    photos[draggedIndex] = photos[index];
+                    photos[index] = temp;
+
+                    // Track reordering for existing photos only
+                    const draggedPhoto = photos[index]; // This is the photo that was dragged
+                    const draggedPhotoId = photoItem.dataset.id; // Get ID from DOM element
+
+                    console.log('After swap - dragged photo:', draggedPhoto);
+                    console.log('Dragged photo has id:', draggedPhoto.id);
+                    console.log('Dragged photo data-id:', draggedPhotoId);
+
+                    // No need to track reordering - will be detected on submit
+                    console.log('Drag & drop completed. Reorder will be detected on submit.');
+
+                    updateGallery();
+                }
+            };
+
+            // Click to open lightbox (only on image, not on buttons)
+            const img = photoItem.querySelector('img');
+            img.onclick = (e) => {
+                e.stopPropagation();
+                openLightbox(index);
+            };
+
+            gallery.appendChild(photoItem);
+        });
+
+        photoCount.textContent = photos.length;
+    }
+
+    window.deletePhoto = function (index) {
+        if (confirm('Bạn có chắc muốn xóa ảnh này?')) {
+            const photo = photos[index];
+
+            // Track deletion if it's an existing photo
+            if (photo.id) {
+                trackPhotoDeleted(photo.id);
+            }
+
+            photos.splice(index, 1);
+            updateGallery();
+        }
+    }
+
+    window.replacePhoto = function (index) {
+        replaceIndex = index;
+        replaceInput.click();
+    }
+
+    replaceInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            compressImage(file, (compressedDataUrl, metadata) => {
+                const oldPhoto = photos[replaceIndex];
+
+                // Track update if it's an existing photo
+                if (oldPhoto.id) {
+                    trackPhotoUpdated(oldPhoto.id, {
+                        file: metadata.file, // Use compressed file
+                        displayOrder: replaceIndex + 1
+                    });
+                }
+
+                photos[replaceIndex] = {
+                    ...oldPhoto,
+                    src: compressedDataUrl,
+                    file: metadata.file, // Use compressed file
+                    name: metadata.name
+                };
+
+                updateGallery();
+                replaceInput.value = '';
+            });
+        }
+    };
+
+
+    // State management for tracking changes
+    let originalPhotos = [];
+    let originalOrder = new Map(); // Cache vị trí ban đầu: photoId -> displayOrder
+    let changes = {
+        added: [],      // Photos mới thêm
+        updated: [],    // Photos bị thay thế
+        deleted: [],    // Photos bị xóa
+        reordered: []   // Photos bị đổi vị trí (detected on submit)
+    };
+
+    // Functions to track changes
+    function trackPhotoAdded(photo) {
+        changes.added.push({
+            file: photo.file,
+            displayOrder: photos.length
+        });
+    }
+
+    function trackPhotoUpdated(oldPhotoId, newPhoto) {
+        changes.updated.push({
+            photoId: oldPhotoId,
+            newFile: newPhoto.file,
+            displayOrder: newPhoto.displayOrder
+        });
+    }
+
+    function trackPhotoDeleted(photoId) {
+        changes.deleted.push(photoId);
+    }
+
+    // Reset changes tracking
+    function resetChanges() {
+        changes = {
+            added: [],
+            updated: [],
+            deleted: [],
+            reordered: []
+        };
+    }
+
+    // Detect reorder changes by comparing current order with original order
+    function detectReorderChanges() {
+        changes.reordered = [];
+
+        console.log('=== DETECTING REORDER CHANGES ===');
+        console.log('Original order cache:', Array.from(originalOrder.entries()));
+
+        // Check each existing photo's current position vs original position
+        photos.forEach((photo, currentIndex) => {
+            if (photo.id) { // Only existing photos have IDs
+                const originalOrderValue = originalOrder.get(photo.id);
+                const currentOrder = currentIndex + 1;
+
+                console.log(`Photo ${photo.id}: original=${originalOrderValue}, current=${currentOrder}`);
+
+                if (originalOrderValue !== currentOrder) {
+                    changes.reordered.push({
+                        photoId: photo.id,
+                        newOrder: currentOrder
+                    });
+                    console.log(`Detected reorder: Photo ${photo.id} moved from ${originalOrderValue} to ${currentOrder}`);
+                }
+            }
+        });
+
+        console.log('Detected reorder changes:', changes.reordered);
+        return changes.reordered.length > 0;
+    }
+
+    // Initialize gallery with existing photos
+    @if (Model.GalleryItems != null && Model.GalleryItems.Any())
+        {
+            <text>
+                console.log('=== INITIALIZING GALLERY ===');
+                originalPhotos = @Html.Raw(Json.Serialize(Model.GalleryItems.OrderBy(x => x.DisplayOrder).Select(x => new {
+                id = x.IdGalleryItem,
+                        src = $"{@apiUrl}/assets/gallery/{@Model.IdGallery}/{x.ImagePath}",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                imagePath = x.ImagePath,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                imageName = x.ImageName,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                displayOrder = x.DisplayOrder
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })));
+
+            console.log('Original photos from server:', originalPhotos);
+                
+                photos = originalPhotos.map(photo => ({
+                ...photo,
+                name: photo.imageName
+                }));
+
+            console.log('Mapped photos array:', photos);
+
+            // Cache original order for comparison later
+            originalOrder.clear();
+                photos.forEach((photo, index) => {
+                    if (photo.id) {
+                originalOrder.set(photo.id, photo.displayOrder);
+            console.log(`Cached original order: Photo ${photo.id} = ${photo.displayOrder}`);
+                    }
+                });
+
+            console.log('Original order cache:', Array.from(originalOrder.entries()));
+
+            updateGallery();
+        </text>
+        }
+                else
+        {
+            <text>
+                console.log('No existing photos, starting with empty gallery');
+                updateGallery();
+            </text>
+    }
+
+
+    // Lightbox functionality
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+    const zoomBtn = document.getElementById('zoomBtn');
+
+    if (lightbox && lightboxImg && lightboxCounter && zoomBtn) {
+        document.getElementById('lightbox-close').onclick = closeLightbox;
+        document.getElementById('lightbox-prev').onclick = showPrevPhoto;
+        document.getElementById('lightbox-next').onclick = showNextPhoto;
+
+        zoomBtn.onclick = () => {
+            isZoomed = !isZoomed;
+            lightboxImg.classList.toggle('zoomed');
+            zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
+        };
+
+        lightboxImg.onclick = () => {
+            isZoomed = !isZoomed;
+            lightboxImg.classList.toggle('zoomed');
+            zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
+        };
+
+        lightbox.onclick = (e) => {
+            if (e.target === lightbox) closeLightbox();
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') showPrevPhoto();
+            if (e.key === 'ArrowRight') showNextPhoto();
+        });
+    }
+
+    function openLightbox(index) {
+        if (!lightbox || !lightboxImg) return;
+        currentPhotoIndex = index;
+        isZoomed = false;
+        lightboxImg.classList.remove('zoomed');
+        if (zoomBtn) zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        isZoomed = false;
+        if (lightboxImg) lightboxImg.classList.remove('zoomed');
+    }
+
+    function showPrevPhoto() {
+        currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+        isZoomed = false;
+        if (lightboxImg) lightboxImg.classList.remove('zoomed');
+        if (zoomBtn) zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+    }
+
+    function showNextPhoto() {
+        currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+        isZoomed = false;
+        if (lightboxImg) lightboxImg.classList.remove('zoomed');
+        if (zoomBtn) zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+    }
+
+    function updateLightboxImage() {
+        if (photos.length === 0 || !lightboxImg || !lightboxCounter) return;
+        lightboxImg.src = photos[currentPhotoIndex].src;
+        lightboxCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+    }
+</script>
