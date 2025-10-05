@@ -26,4 +26,5 @@ RUN dotnet publish "NguyenTienLinh.csproj" -c Release -o /app/publish
 FROM base as final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ["NguyenTienLinh/wwwroot/assets/gallery", "wwwroot/assets/gallery"]
 ENTRYPOINT ["dotnet","NguyenTienLinh.dll"]
