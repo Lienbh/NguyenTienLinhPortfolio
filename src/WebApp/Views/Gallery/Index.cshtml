@@ -3,6 +3,7 @@
     ViewData["Title"] = "Gallery";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var apiUrl = ViewBag.ApiUrl;
+    var cdnUrl = ViewBag.CdnUrl;
     var isLoggedIn = !string.IsNullOrEmpty(TempData["currentUser"]?.ToString());
 }
 
@@ -56,6 +57,7 @@
     let currentSearch = '';
     const pageSize = 10;
     const apiUrl = '@apiUrl';
+    const cdnUrl = '@cdnUrl';
 
     // DOM Elements
     const galleryGrid = document.querySelector('.gallery-grid');
@@ -200,7 +202,7 @@
         galleryItem.innerHTML = `
             <div class="gallery-banner">
                 ${gallery.bannerImagePath ?
-                `<img src="${apiUrl}/assets/gallery/${gallery.idGallery}/${gallery.bannerImagePath}" alt="${gallery.title}" class="banner-img">` :
+                `<img src="${cdnUrl}/assets/gallery/${gallery.idGallery}/${gallery.bannerImagePath}" alt="${gallery.title}" class="banner-img">` :
                 `<div class="banner-placeholder"><span class="placeholder-icon">📸</span></div>`
             }
                 
@@ -229,7 +231,7 @@
                 ${gallery.galleryItems.length > 0 ?
                 gallery.galleryItems.slice(0, 5).map(item =>
                     `<div class="preview-item">
-                            <img src="${apiUrl}/assets/gallery/${gallery.idGallery}/${item.imagePath}" alt="${item.imageName}" class="preview-img">
+                            <img src="${cdnUrl}/assets/gallery/${gallery.idGallery}/${item.imagePath}" alt="${item.imageName}" class="preview-img">
                         </div>`
                 ).join('') +
                 (gallery.galleryItems.length > 5 ?
@@ -341,7 +343,7 @@
                 if (typeof Swal !== 'undefined') {
                     await Swal.fire({
                         title: 'Thành công!',
-                        text: `Gallery "${galleryTitle}" đã được xóa thành công!`,
+                        text: `Gallery "${galleryTitle}" đã được xóa thàsnh công!`,
                         icon: 'success',
                         confirmButtonText: 'OK'
                     });

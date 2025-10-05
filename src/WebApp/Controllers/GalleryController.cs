@@ -31,7 +31,9 @@ namespace WebApp.Controllers
             }
 
             var apiUrl = _configuration["AppSettings:ApiUrl"];
+            var cdnUrl = _configuration["AppSettings:CdnUrl"];
             ViewBag.ApiUrl = apiUrl;
+            ViewBag.CdnUrl = cdnUrl;
 
             // Return empty model - all data will be loaded via AJAX
             return View(new List<GalleryDTO>());
@@ -167,7 +169,9 @@ namespace WebApp.Controllers
             }
 
             var apiUrl = _configuration["AppSettings:ApiUrl"];
+            var cdnUrl = _configuration["AppSettings:CdnUrl"];
             ViewBag.ApiUrl = apiUrl;
+            ViewBag.CdnUrl = cdnUrl;
 
             if (id == null || id == 0)
             {
@@ -219,7 +223,9 @@ namespace WebApp.Controllers
             }
 
             var apiUrl = _configuration["AppSettings:ApiUrl"];
+            var cdnUrl = _configuration["AppSettings:CdnUrl"];
             ViewBag.ApiUrl = apiUrl;
+            ViewBag.CdnUrl = cdnUrl;
 
             HttpClient client = new HttpClient();
             string requestURL = $"{apiUrl}/api/Gallery/by-url/{Uri.EscapeDataString(slug)}";
