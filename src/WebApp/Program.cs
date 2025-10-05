@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,19 @@ builder.Services.AddSession(option =>
 });
 var app = builder.Build();
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine("/root/ntl-sln/NguyenTienLinhPortfolio/src/NguyenTienLinh/wwwroot/assets")
+    ),
+    RequestPath = "/gallery-images",
+
+    // Tùy chọn header, cache, security
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Cache-Control"] = "public,max-age=2592000"; // 30 ngày
+    }
+});
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();

@@ -38,10 +38,12 @@
     </div>
 </div>
 
-<!-- Loading Indicator -->
-<div id="loadingIndicator" class="loading-indicator" style="display: none;">
-    <div class="loading-spinner"></div>
-    <span>Loading more galleries...</span>
+<!-- Load More Button -->
+<div class="load-more-container">
+    <button id="loadMoreBtn" class="load-more-btn" style="display: none;">
+        <span class="btn-text">Load More Galleries</span>
+        <span class="btn-spinner" style="display: none;">⏳</span>
+    </button>
 </div>
 
 <!-- End of Results -->
@@ -50,7 +52,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // Infinite Scroll and Search functionality
+    // Load More Button and Search functionality
     let currentPage = 1;
     let isLoading = false;
     let hasMorePages = true;
@@ -64,7 +66,9 @@
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const loadingIndicator = document.getElementById('loadingIndicator');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const btnText = loadMoreBtn ? loadMoreBtn.querySelector('.btn-text') : null;
+    const btnSpinner = loadMoreBtn ? loadMoreBtn.querySelector('.btn-spinner') : null;
     const endOfResults = document.getElementById('endOfResults');
 
     // Search functionality
@@ -141,9 +145,11 @@
 
         isLoading = true;
 
-        // Only show loading indicator if we're not on the first page
-        if (currentPage > 1 && loadingIndicator) {
-            loadingIndicator.style.display = 'flex';
+        // Show loading state on button
+        if (loadMoreBtn) {
+            loadMoreBtn.disabled = true;
+            if (btnText) btnText.style.display = 'none';
+            if (btnSpinner) btnSpinner.style.display = 'inline';
         }
 
         const searchParam = currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '';
@@ -174,9 +180,8 @@
                         hasMorePages = result.hasNextPage;
                         currentPage++;
 
-                        if (!hasMorePages) {
-                            showEndOfResults();
-                        }
+                        // Show/hide load more button
+                        updateLoadMoreButton();
                     }
                 }
             },
@@ -185,8 +190,12 @@
             },
             complete: function () {
                 isLoading = false;
-                if (loadingIndicator) {
-                    loadingIndicator.style.display = 'none';
+
+                // Reset button state
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = false;
+                    if (btnText) btnText.style.display = 'inline';
+                    if (btnSpinner) btnSpinner.style.display = 'none';
                 }
             }
         });
@@ -263,6 +272,18 @@
                     </div>
                 </div>
             `;
+        }
+    }
+
+    // Update load more button visibility
+    function updateLoadMoreButton() {
+        if (loadMoreBtn) {
+            if (hasMorePages) {
+                loadMoreBtn.style.display = 'block';
+            } else {
+                loadMoreBtn.style.display = 'none';
+                showEndOfResults();
+            }
         }
     }
 
@@ -420,12 +441,12 @@
         });
     }
 
-    // Infinite scroll
-    window.addEventListener('scroll', () => {
-        if (hasMorePages && window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+    // Load More Button Event Listener
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
             loadGalleries();
-        }
-    });
+        });
+    }
 
     // Initial load
     document.addEventListener('DOMContentLoaded', () => {
