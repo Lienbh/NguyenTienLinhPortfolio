@@ -1,5 +1,4 @@
-﻿
-using System.Net;
+﻿using System.Net;
 using AppApi.IRepository;
 using AppApi.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,12 +15,12 @@ namespace NguyenTienLinh
 {
     public class Program
     {
-
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            // Force TLS 1.2 for SQL Server connections
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
-            // Add services to the container.
+            var builder = WebApplication.CreateBuilder(args);
 
             // Configure request body size limits
             builder.Services.Configure<IISServerOptions>(options =>
@@ -41,17 +40,10 @@ namespace NguyenTienLinh
                 options.ValueCountLimit = int.MaxValue; // No limit
             });
 
-            //gọi đến login controller
+            // Add services
             builder.Services.AddControllersWithViews();
-            // builder.WebHost.ConfigureKestrel(options =>
-            // {
-            //     options.Listen(IPAddress.Any, 80); // HTTP port
-            //     options.Listen(IPAddress.Any, 443, listenOptions =>
-            //     {
-            //         listenOptions.UseHttps("/https/aspnetapp.pfx", "YourPassword");
-            //     });
-            // });
-            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Conn")));
+            builder.Services.AddDbContext<AppDbContext>(options => 
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Conn")));
             builder.Services.AddControllers();
             builder.Services.AddTransient<IAboutsRepos, AboutRepo>();
             builder.Services.AddTransient<ICategoriesRepo, CategoriesRepos>();
@@ -60,9 +52,6 @@ namespace NguyenTienLinh
             builder.Services.AddTransient<IBackGroundsRepo, BackGroundRepo>();
             builder.Services.AddTransient<IGalleryRepo, GalleryRepo>();
 
-
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -76,6 +65,7 @@ namespace NguyenTienLinh
                             .AllowAnyMethod();
                     });
             });
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(option =>
                 {
@@ -93,13 +83,13 @@ namespace NguyenTienLinh
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -109,6 +99,5 @@ namespace NguyenTienLinh
             app.MapControllers();
             app.Run();
         }
-
     }
 }
