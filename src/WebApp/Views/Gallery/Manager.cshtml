@@ -1,26 +1,148 @@
 @model BuildingBlock.DTOS.GalleryDTO
 @{
-    ViewData["Title"] = $"{Model.Title}";
+    ViewData["Title"] = $"{Model.Title} - Nguyen Tien Linh Photography";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var apiUrl = ViewBag.ApiUrl;
+    var isLoggedIn = !string.IsNullOrEmpty(TempData["currentUser"]?.ToString());
+    
+    // SEO Meta Data
+    var galleryDescription = $"Professional photography gallery by Nguyen Tien Linh featuring {Model.GalleryItems.Count} stunning images. {Model.Title} showcases creative videography and photography work.";
+    var galleryKeywords = $"photography, videography, gallery, {Model.Title.ToLower()}, nguyen tien linh, professional photographer, hanoi photographer";
+    var canonicalUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Model.Url}";
+    var imageUrl = $"{apiUrl}/assets/gallery/{Model.IdGallery}/{Model.BannerImagePath}";
 }
-<link rel="stylesheet" href="~/css/gallery-manager.css"/>
 
-<!-- Hero Banner -->
-<div class="hero-banner" id="heroBanner">
+<!-- SEO Meta Tags -->
+<meta name="description" content="@galleryDescription" />
+<meta name="keywords" content="@galleryKeywords" />
+<meta name="author" content="Nguyen Tien Linh" />
+<meta name="robots" content="index, follow" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="@Model.Title - Nguyen Tien Linh Photography" />
+<meta property="og:description" content="@galleryDescription" />
+<meta property="og:image" content="@imageUrl" />
+<meta property="og:url" content="@canonicalUrl" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Nguyen Tien Linh Photography" />
+<meta property="og:locale" content="vi_VN" />
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="@Model.Title - Nguyen Tien Linh Photography" />
+<meta name="twitter:description" content="@galleryDescription" />
+<meta name="twitter:image" content="@imageUrl" />
+<meta name="twitter:site" content="Nguyen Tien Linh" />
+
+<!-- Canonical URL -->
+<link rel="canonical" href="@canonicalUrl" />
+
+<!-- Preload Critical Resources -->
+<link rel="preload" href="@imageUrl" as="image" />
+<link rel="preload" href="~/css/gallery-manager.css" as="style" />
+
+<!-- DNS Prefetch for External Resources -->
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "ImageGallery",
+  "name": "@Model.Title",
+  "description": "@galleryDescription",
+  "url": "@canonicalUrl",
+  "image": "@imageUrl",
+  "author": {
+    "@@type": "Person",
+    "name": "Nguyen Tien Linh",
+    "jobTitle": "Professional Photographer & Videographer",
+    "address": {
+      "@@type": "PostalAddress",
+      "addressLocality": "Hanoi",
+      "addressCountry": "Vietnam"
+    }
+  },
+  "publisher": {
+    "@@type": "Organization",
+    "name": "Nguyen Tien Linh Photography",
+    "url": "@(Context.Request.Scheme)://@(Context.Request.Host)"
+  },
+  "dateCreated": "@Model.CreatedDate.ToString("yyyy-MM-dd")",
+  "dateModified": "@Model.CreatedDate.ToString("yyyy-MM-dd")",
+  "numberOfItems": 99,
+  "mainEntity": {
+    "@@type": "ItemList",
+    "numberOfItems": 99,
+    "itemListElement": [
+      @for (int i = 0; i < Model.GalleryItems.Count; i++)
+      {
+        var item = Model.GalleryItems[i];
+        var itemImageUrl = $"{apiUrl}/assets/gallery/{Model.IdGallery}/{item.ImagePath}";
+        <text>{
+        "@@type": "ImageObject",
+        "position": 1,
+        "name": "@item.ImageName",
+        "description": "@item.Description",
+        "url": "@itemImageUrl",
+        "contentUrl": "@itemImageUrl",
+        "thumbnailUrl": "@itemImageUrl"
+        }</text>
+      
+      }
+    ]
+  }
+}
+</script>
+<link rel="stylesheet" href="~/css/gallery-manager.css" />
+
+<!-- Breadcrumb Navigation -->
+<nav aria-label="Breadcrumb" class="breadcrumb-nav">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/" aria-label="Home">Trang chủ</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/Gallery" aria-label="Gallery List">Thư viện ảnh</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            @Model.Title
+        </li>
+    </ol>
+</nav>
+
+
+<div class="hero-banner" id="heroBanner" role="banner">
     <div class="coverage">
         <img id="heroBannerImg" class="hero-banner-bg"
-             src="@apiUrl/assets/gallery/@Model.IdGallery/@Model.BannerImagePath" alt="Banner">
+            src="@apiUrl/assets/gallery/@Model.IdGallery/@Model.BannerImagePath" 
+            alt="@Model.Title - Professional Photography Gallery by Nguyen Tien Linh"
+            loading="eager">
         <div class="hero-banner-content">
             <div class="hero-logo">
-                <img src="~/assets/Logo/L2.png" alt="Logo"/>
+                <img src="~/assets/Logo/L2.png" alt="Nguyen Tien Linh Photography Logo" />
             </div>
             <div class="gallery-title-section">
-                <div id="galleryTitleDisplay" class="gallery-title-display">@Model.Title.ToUpper()</div>
-                <input type="text" id="galleryTitleInput" class="gallery-title-input" value="@Model.Title"
-                       placeholder="Nhập tên Gallery" style="display: none;">
-                <button class="edit-title-btn" onclick="toggleTitleEdit()" title="Chỉnh sửa tên">✏️</button>
+                <h1 id="galleryTitleDisplay" class="gallery-title-display">@Model.Title.ToUpper()</h1>
+                @if (isLoggedIn)
+                {
+                    <input type="text" id="galleryTitleInput" class="gallery-title-input" value="@Model.Title"
+                        placeholder="Nhập tên Gallery" style="display: none;">
+                    <button class="edit-title-btn" onclick="toggleTitleEdit()" title="Chỉnh sửa tên">✏️</button>
+                }
             </div>
+            @if (Model.IdGallery > 0)
+            {
+                <div class="gallery-url-section">
+                    <div class="gallery-url-display">
+                        <span class="url-label">URL:</span>
+                        <span class="url-value"
+                            id="galleryUrlDisplay">@(Context.Request.Scheme)://@(Context.Request.Host)@("/Gallery")@(Model.Url)</span>
+                    </div>
+                </div>
+            }
             <div class="date">@Model.CreatedDate.ToString("dd/MM/yyyy")</div>
             <div class="dflex justify-content-center">
                 <div class="photo-count">
@@ -28,79 +150,112 @@
                     <span id="photoCount">@Model.GalleryItems.Count</span> Photos
                 </div>
             </div>
-            <div class="hero-actions">
-                <button class="hero-banner-btn" onclick="document.getElementById('bannerInput').click()">
-                    CHỌN ẢNH BANNER
-                </button>
-                <button class="hero-action-btn" id="saveGalleryBtn" onclick="saveGallery()">
-                    @(Model.IdGallery == 0 ? "TẠO GALLERY" : "LƯU GALLERY")
-                </button>
-                @if (Model.IdGallery == 0)
-                {
-                    <button class="hero-action-btn secondary" onclick="window.location.href='/Gallery'">
-                        HỦY
+            @if (isLoggedIn)
+            {
+                <div class="hero-actions">
+                    <button class="hero-banner-btn" onclick="document.getElementById('bannerInput').click()">
+                        CHỌN ẢNH BANNER
                     </button>
-                }
-            </div>
+                    <button class="hero-action-btn" id="saveGalleryBtn" onclick="saveGallery()">
+                        @(Model.IdGallery == 0 ? "TẠO GALLERY" : "LƯU GALLERY")
+                    </button>
+                    @if (Model.IdGallery == 0)
+                    {
+                        <button class="hero-action-btn secondary" onclick="window.location.href='/Gallery'">
+                            HỦY
+                        </button>
+                    }
+                </div>
+            }
             <div class="view-gallery-link">
-                <a href="#" class="view-gallery-text">View Gallery</a>
+                <a href="#" class="view-gallery-text" id="viewGalleryLink">View Gallery</a>
             </div>
         </div>
     </div>
 </div>
-<input type="file" id="bannerInput" accept="image/*" style="display: none;">
+@if (isLoggedIn)
+{
+    <input type="file" id="bannerInput" accept="image/*" style="display: none;">
 
-<div class="upload-section">
-    <div class="upload-area" id="uploadArea">
-        <div class="upload-icon text-center">📸</div>
-        <div class="upload-text text-center">Kéo thả ảnh vào đây hoặc click để chọn</div>
-    </div>
-    <input type="file" id="fileInput" multiple accept="image/*">
-
-    <div class="preview-section" id="previewSection" style="display: none;">
-        <div class="preview-header">
-            <div class="preview-title"><span id="previewCount">0</span> ảnh đã chọn</div>
-            <div class="processing-indicator" id="processingIndicator" style="display: none;">
-                <span class="spinner"></span>
-                <span>Đang xử lý ảnh...</span>
-            </div>
+    <div class="upload-section">
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon text-center">📸</div>
+            <div class="upload-text text-center">Kéo thả ảnh vào đây hoặc click để chọn</div>
         </div>
-        <div class="preview-grid" id="previewGrid"></div>
-        <center>
-            <button class="add-photos-btn" id="addPhotosBtn">
-                Thêm vào Gallery
-            </button>
-        </center>
+        <input type="file" id="fileInput" multiple accept="image/*">
+
+        <div class="preview-section" id="previewSection" style="display: none;">
+            <div class="preview-header">
+                <div class="preview-title"><span id="previewCount">0</span> ảnh đã chọn</div>
+                <div class="processing-indicator" id="processingIndicator" style="display: none;">
+                    <span class="spinner"></span>
+                    <span>Đang nén và xử lý ảnh...</span>
+                </div>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+            <center>
+                <button class="add-photos-btn" id="addPhotosBtn" style="display: none;">
+                    Thêm vào Gallery
+                </button>
+            </center>
+        </div>
     </div>
-</div>
 
-<div class="section-divider"></div>
+    <div class="section-divider"></div>
+}
 
-<div class="gallery-container">
-    <div class="gallery" id="gallery">
+<main class="gallery-container" role="main">
+    <section class="gallery" id="gallery" aria-label="Photo Gallery">
         <div class="gallery-sizer"></div>
         @if (Model.GalleryItems != null && Model.GalleryItems.Any())
         {
             @foreach (var item in Model.GalleryItems.OrderBy(x => x.DisplayOrder))
             {
-                <div class="photo-item" data-id="@item.IdGalleryItem">
-                    <img src="@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath" alt="@item.ImageName">
+                <article class="photo-item" data-id="@item.IdGalleryItem" role="img" aria-label="@item.ImageName">
+                    <img src="@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath" 
+                         alt="@item.ImageName - Professional Photography by Nguyen Tien Linh"
+                         loading="lazy"
+                         width="400"
+                         height="auto">
                     <div class="photo-overlay">
-                        <span class="photo-number">#@item.DisplayOrder.ToString("00")</span>
-                        <div class="photo-actions">
-                            <button class="photo-action-btn replace" onclick="replacePhoto(@item.IdGalleryItem)"
+                        <span class="photo-number" aria-label="Photo number @item.DisplayOrder">#@item.DisplayOrder.ToString("00")</span>
+                        @if (isLoggedIn)
+                        {
+                            <div class="photo-actions">
+                                <button class="photo-action-btn replace" onclick="replacePhoto(@item.IdGalleryItem)"
                                     title="Thay thế">🔄
-                            </button>
-                            <button class="photo-action-btn delete" onclick="deletePhoto(@item.IdGalleryItem)"
-                                    title="Xóa">🗑️
-                            </button>
-                        </div>
+                                </button>
+                                <button class="photo-action-btn delete" onclick="deletePhoto(@item.IdGalleryItem)" title="Xóa">🗑️
+                                </button>
+                                <button class="photo-action-btn share"
+                                    onclick="openShareModal('@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath', '@item.ImageName')"
+                                    title="Chia sẻ">🔗
+                                </button>
+                                <button class="photo-action-btn download"
+                                    onclick="downloadImage('@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath', '@item.ImageName')"
+                                    title="Tải xuống">⬇️
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="photo-actions">
+                                <button class="photo-action-btn share"
+                                    onclick="openShareModal('@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath', '@item.ImageName')"
+                                    title="Chia sẻ">🔗
+                                </button>
+                                <button class="photo-action-btn download"
+                                    onclick="downloadImage('@apiUrl/assets/gallery/@Model.IdGallery/@item.ImagePath', '@item.ImageName')"
+                                    title="Tải xuống">⬇️
+                                </button>
+                            </div>
+                        }
                     </div>
-                </div>
+                </article>
             }
         }
-    </div>
-</div>
+    </section>
+</main>
 
 <div class="quick-preview" id="quickPreview">
     <img id="quickPreviewImg" src="" alt="">
@@ -119,9 +274,9 @@
         <div class="lightbox-counter" id="lightbox-counter"></div>
         <div class="lightbox-actions">
             <button class="lightbox-btn" id="zoomBtn" title="Zoom">🔍</button>
-            <button class="lightbox-btn" title="Yêu thích">❤️</button>
-            <button class="lightbox-btn" title="Tải xuống">📥</button>
-            <button class="lightbox-btn" title="Chia sẻ">📤</button>
+            <button class="lightbox-btn" id="slideshowBtn" title="Slideshow">▶️</button>
+            <button class="lightbox-btn" id="downloadBtn" title="Tải xuống">📥</button>
+            <button class="lightbox-btn" id="shareBtn" title="Chia sẻ">📤</button>
         </div>
     </div>
 </div>
@@ -138,10 +293,74 @@
     </div>
 </div>
 
-<input type="file" id="replaceInput" accept="image/*" style="display: none;">
+<!-- Share Modal -->
+<div class="share-modal" id="shareModal">
+    <div class="share-modal-content">
+        <div class="share-header">
+            <h3>SHARE</h3>
+            <button class="share-close" id="shareClose">×</button>
+        </div>
+        <div class="share-link-section">
+            <input type="text" id="shareLink" readonly value="">
+            <button class="copy-btn" id="copyBtn">COPY</button>
+        </div>
+        <div class="share-platforms">
+            <div class="share-platform" data-platform="messenger">
+                <div class="platform-icon messenger">💬</div>
+                <span>Messenger</span>
+            </div>
+            <div class="share-platform" data-platform="whatsapp">
+                <div class="platform-icon whatsapp">📱</div>
+                <span>WhatsApp</span>
+            </div>
+            <div class="share-platform" data-platform="zalo">
+                <div class="platform-icon zalo">Z</div>
+                <span>Zalo</span>
+            </div>
+            <div class="share-platform" data-platform="facebook">
+                <div class="platform-icon facebook">f</div>
+                <span>Facebook</span>
+            </div>
+            <div class="share-platform" data-platform="email">
+                <div class="platform-icon email">✉️</div>
+                <span>Email</span>
+            </div>
+            <div class="share-platform" data-platform="twitter">
+                <div class="platform-icon twitter">𝕏</div>
+                <span>X (Twitter)</span>
+            </div>
+            <div class="share-platform" data-platform="pinterest">
+                <div class="platform-icon pinterest">P</div>
+                <span>Pinterest</span>
+            </div>
+            <div class="share-platform" data-platform="threads">
+                <div class="platform-icon threads">@@</div>
+                <span>Threads</span>
+            </div>
+            <div class="share-platform" data-platform="more">
+                <div class="platform-icon more">⋯</div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+</div>
+<button class="back-to-top" id="backToTopBtn" title="Back to Top">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 14L12 9L17 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+    </svg>
+</button>
+@if (isLoggedIn)
+{
+    <input type="file" id="replaceInput" accept="image/*" style="display: none;">
+}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
 <script>
+    // Authentication check removed - handled by server-side rendering
+    const isLoggedIn = @isLoggedIn.ToString().ToLower();
+
+    // DOM Elements
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('fileInput');
     const replaceInput = document.getElementById('replaceInput');
@@ -156,7 +375,8 @@
     const quickPreviewImg = document.getElementById('quickPreviewImg');
     const bannerInput = document.getElementById('bannerInput');
     const heroBannerImg = document.getElementById('heroBannerImg');
-    
+
+    // State variables
     let masonryInstance = null;
     let photos = [];
     let previewPhotos = [];
@@ -184,46 +404,45 @@
         reordered: []
     };
 
-    // FIXED: imagesLoaded helper - đảm bảo callback chỉ gọi 1 lần
+    // Helper function to wait for images to load
     function imagesLoaded(elem, callback) {
         const images = elem.querySelectorAll('img');
         let loaded = 0;
         const total = images.length;
-        
+
         if (total === 0) {
             callback();
             return;
         }
-        
+
         let callbackFired = false;
-        
+
         function checkComplete() {
             if (!callbackFired && loaded === total) {
                 callbackFired = true;
                 callback();
             }
         }
-        
+
         images.forEach(img => {
             if (img.complete) {
                 loaded++;
+                checkComplete();
             } else {
-                img.onload = () => {
+                img.addEventListener('load', () => {
                     loaded++;
                     checkComplete();
-                };
-                img.onerror = () => {
+                });
+                img.addEventListener('error', () => {
                     loaded++;
                     checkComplete();
-                };
+                });
             }
         });
-        
-        // Check ngay nếu tất cả ảnh đã complete
-        checkComplete();
     }
 
-    // Title editing
+
+    // ============= TITLE EDITING =============
     function toggleTitleEdit() {
         const titleDisplay = document.getElementById('galleryTitleDisplay');
         const titleInput = document.getElementById('galleryTitleInput');
@@ -264,31 +483,965 @@
         const titleInput = document.getElementById('galleryTitleInput');
         const editBtn = document.querySelector('.edit-title-btn');
 
-        if (isTitleEditing && !titleInput.contains(e.target) && !editBtn.contains(e.target)) {
+        if (isTitleEditing && titleInput && editBtn && !titleInput.contains(e.target) && !editBtn.contains(e.target)) {
             saveTitle();
         }
     });
 
-    document.getElementById('galleryTitleInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+    const galleryTitleInput = document.getElementById('galleryTitleInput');
+    if (galleryTitleInput) {
+        galleryTitleInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveTitle();
+            } else if (e.key === 'Escape') {
+                saveTitle();
+            }
+        });
+    }
+
+    // ============= BANNER UPLOAD =============
+    if (bannerInput) {
+        bannerInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                compressImage(file, (compressedDataUrl, metadata) => {
+                    bannerFile = metadata.file;
+                    bannerImageName = metadata.name;
+                    heroBannerImg.src = compressedDataUrl;
+                    setTimeout(() => {
+                        heroBannerImg.classList.add('loaded');
+                    }, 100);
+                });
+            }
+        });
+    }
+
+    @if (!string.IsNullOrEmpty(Model.BannerImagePath))
+        {
+            <text>
+                if (heroBannerImg) {
+                    heroBannerImg.classList.add('loaded');
+                                            }
+            </text>
+    }
+
+    // ============= UPLOAD AREA =============
+    if (uploadArea && fileInput) {
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            saveTitle();
+            e.stopPropagation();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files);
+            }
+        });
+    }
+
+    function handleFiles(files) {
+        // Disable save button during processing
+        const saveBtn = document.getElementById('saveGalleryBtn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'ĐANG XỬ LÝ ẢNH...';
         }
+
+        previewPhotos = [];
+        previewMetadata = [];
+        previewGrid.innerHTML = '';
+        previewSection.style.display = 'block';
+        addPhotosBtn.style.display = 'none';
+        processingIndicator.style.display = 'flex';
+
+        let processedCount = 0;
+        const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+        const totalFiles = imageFiles.length;
+
+        if (totalFiles === 0) {
+            previewSection.style.display = 'none';
+            // Re-enable save button
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO GALLERY' : 'LƯU GALLERY';
+            }
+            return;
+        }
+
+        imageFiles.forEach((file) => {
+            compressImage(file, (compressedDataUrl, metadata) => {
+                previewPhotos.push(compressedDataUrl);
+                previewMetadata.push(metadata);
+                addPreview(compressedDataUrl, previewPhotos.length - 1, metadata);
+                previewCount.textContent = previewPhotos.length;
+
+                processedCount++;
+
+                if (processedCount === totalFiles) {
+                    processingIndicator.style.display = 'none';
+
+                    // Automatically add photos to gallery
+                    addPhotosToGallery();
+
+                    // Re-enable save button
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO GALLERY' : 'LƯU GALLERY';
+                    }
+                }
+            });
+        });
+    }
+
+    // ============= IMAGE COMPRESSION =============
+    function compressImage(file, callback) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+                const maxWidth = 1920;
+                const maxHeight = 1920;
+
+                if (width > maxWidth || height > maxHeight) {
+                    if (width > height) {
+                        height = (height / width) * maxWidth;
+                        width = maxWidth;
+                    } else {
+                        width = (width / height) * maxHeight;
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                const byteString = atob(compressedDataUrl.split(',')[1]);
+                const mimeString = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: mimeString });
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), { type: 'image/jpeg' });
+
+                const metadata = {
+                    name: file.name,
+                    type: 'image/jpeg',
+                    originalSize: file.size,
+                    compressedSize: compressedFile.size,
+                    dimensions: { width, height },
+                    file: compressedFile
+                };
+
+                callback(compressedDataUrl, metadata);
+            };
+            img.onerror = () => {
+                console.error('Error loading image:', file.name);
+            };
+            img.src = e.target.result;
+        };
+        reader.onerror = () => {
+            console.error('Error reading file:', file.name);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // ============= PREVIEW MANAGEMENT =============
+    function addPreview(src, index, metadata) {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'preview-item';
+        previewItem.innerHTML = `
+            <img src="${src}" alt="Preview ${index + 1}">
+            <button class="preview-remove" data-index="${index}">×</button>
+            <div class="preview-info">
+                <div class="preview-filename">${metadata.name}</div>
+                <div class="preview-size">${formatFileSize(metadata.compressedSize)} • ${metadata.type.split('/')[1].toUpperCase()}</div>
+            </div>
+        `;
+
+        const img = previewItem.querySelector('img');
+        if (img) {
+            img.addEventListener('mouseenter', () => showQuickPreview(src));
+            img.addEventListener('mouseleave', hideQuickPreview);
+        }
+
+        const removeBtn = previewItem.querySelector('.preview-remove');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removePreview(parseInt(e.target.dataset.index));
+            });
+        }
+
+        previewGrid.appendChild(previewItem);
+    }
+
+    function showQuickPreview(src) {
+        clearTimeout(quickPreviewTimeout);
+        quickPreviewTimeout = setTimeout(() => {
+            quickPreviewImg.src = src;
+            quickPreview.classList.add('active');
+        }, 500);
+    }
+
+    function hideQuickPreview() {
+        clearTimeout(quickPreviewTimeout);
+        quickPreview.classList.remove('active');
+    }
+
+    function removePreview(index) {
+        previewPhotos.splice(index, 1);
+        previewMetadata.splice(index, 1);
+        updatePreviewGrid();
+
+        if (previewPhotos.length === 0) {
+            previewSection.style.display = 'none';
+        }
+    }
+
+    function updatePreviewGrid() {
+        previewGrid.innerHTML = '';
+        previewPhotos.forEach((src, index) => {
+            addPreview(src, index, previewMetadata[index]);
+        });
+        previewCount.textContent = previewPhotos.length;
+    }
+
+    // Function to automatically add photos to gallery
+    function addPhotosToGallery() {
+        if (previewPhotos.length === 0) return;
+
+        const sizes = ['size-small', 'size-medium', 'size-large', 'size-xlarge'];
+
+        previewPhotos.forEach((src, index) => {
+            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+            const newPhoto = {
+                src: src,
+                file: previewMetadata[index].file,
+                name: previewMetadata[index].name,
+                imagePath: null,
+                imageName: previewMetadata[index].name,
+                size: randomSize
+            };
+
+            photos.push(newPhoto);
+            trackPhotoAdded(newPhoto);
+        });
+
+        updateGallery();
+
+        // Clear preview data
+        previewPhotos = [];
+        previewMetadata = [];
+        previewGrid.innerHTML = '';
+        fileInput.value = '';
+        previewSection.style.display = 'none';
+
+        // Scroll to gallery
+        setTimeout(() => {
+            gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+    }
+
+    if (addPhotosBtn) {
+        addPhotosBtn.addEventListener('click', () => {
+            addPhotosToGallery();
+        });
+    }
+
+    // ============= GALLERY MANAGEMENT =============
+    function updateGallery() {
+        const existingItems = gallery.querySelectorAll('.photo-item');
+        existingItems.forEach(item => item.remove());
+
+        photos.forEach((photo, index) => {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.draggable = true;
+            photoItem.dataset.index = index;
+
+            if (photo.id) {
+                photoItem.dataset.id = photo.id;
+            }
+
+            if (photo.size) {
+                photoItem.classList.add(photo.size);
+            }
+
+            if (isLoggedIn) {
+                photoItem.innerHTML = `
+                    <img src="${photo.src}" alt="Photo ${index + 1}">
+                    <div class="photo-overlay">
+                        <span class="photo-number">#${String(index + 1).padStart(2, '0')}</span>
+                        <div class="photo-actions">
+                            <button class="photo-action-btn replace" data-index="${index}" title="Thay thế">🔄</button>
+                            <button class="photo-action-btn delete" data-index="${index}" title="Xóa">🗑️</button>
+                            <button class="photo-action-btn share" data-index="${index}" title="Chia sẻ">🔗</button>
+                            <button class="photo-action-btn download" data-index="${index}" title="Tải xuống">⬇️</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                photoItem.innerHTML = `
+                    <img src="${photo.src}" alt="Photo ${index + 1}">
+                    <div class="photo-overlay">
+                        <span class="photo-number">#${String(index + 1).padStart(2, '0')}</span>
+                        <div class="photo-actions">
+                            <button class="photo-action-btn share" data-index="${index}" title="Chia sẻ">🔗</button>
+                            <button class="photo-action-btn download" data-index="${index}" title="Tải xuống">⬇️</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Drag and drop handlers (only for logged in users)
+            if (isLoggedIn) {
+                photoItem.addEventListener('dragstart', (e) => {
+                    draggedIndex = index;
+                    photoItem.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                photoItem.addEventListener('dragend', () => {
+                    photoItem.classList.remove('dragging');
+                });
+
+                photoItem.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    photoItem.classList.add('drag-over');
+                });
+
+                photoItem.addEventListener('dragleave', () => {
+                    photoItem.classList.remove('drag-over');
+                });
+
+                photoItem.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    photoItem.classList.remove('drag-over');
+
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        const temp = photos[draggedIndex];
+                        photos[draggedIndex] = photos[index];
+                        photos[index] = temp;
+                        updateGallery();
+                    }
+                });
+            }
+
+            // Click to open lightbox
+            const img = photoItem.querySelector('img');
+            if (img) {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openLightbox(index);
+                });
+            }
+
+            // Also make the whole photo item clickable
+            photoItem.addEventListener('click', (e) => {
+                // Only open lightbox if not clicking on buttons
+                if (!e.target.classList.contains('photo-action-btn')) {
+                    openLightbox(index);
+                }
+            });
+
+            // Button handlers
+            if (isLoggedIn) {
+                const replaceBtn = photoItem.querySelector('.replace');
+                if (replaceBtn) {
+                    replaceBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        replacePhoto(parseInt(e.target.dataset.index));
+                    });
+                }
+
+                const deleteBtn = photoItem.querySelector('.delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        deletePhoto(parseInt(e.target.dataset.index));
+                    });
+                }
+            }
+
+            const shareBtn = photoItem.querySelector('.share');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openShareModal(photo.src, photo.name || `photo-${index + 1}.jpg`);
+                });
+            }
+
+            const downloadBtn = photoItem.querySelector('.download');
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadImage(photo.src, photo.name || `photo-${index + 1}.jpg`);
+                });
+            }
+
+            gallery.appendChild(photoItem);
+        });
+
+        photoCount.textContent = photos.length;
+
+        if (masonryInstance) {
+            masonryInstance.destroy();
+            masonryInstance = null;
+        }
+
+        imagesLoaded(gallery, function () {
+            masonryInstance = new Masonry(gallery, {
+                itemSelector: '.photo-item',
+                columnWidth: '.gallery-sizer',
+                percentPosition: true,
+                gutter: 4,
+                transitionDuration: '0.3s'
+            });
+        });
+    }
+
+    function deletePhoto(index) {
+        swal({
+            title: 'Xác nhận',
+            text: 'Bạn có chắc muốn xóa ảnh này?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.value) {
+                const photo = photos[index];
+
+                if (photo.id) {
+                    trackPhotoDeleted(photo.id);
+                }
+
+                photos.splice(index, 1);
+                updateGallery();
+            }
+        });
+    }
+
+    function replacePhoto(index) {
+        replaceIndex = index;
+        if (replaceInput) {
+            replaceInput.click();
+        }
+    }
+
+    if (replaceInput) {
+        replaceInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                compressImage(file, (compressedDataUrl, metadata) => {
+                    const oldPhoto = photos[replaceIndex];
+
+                    if (oldPhoto.id) {
+                        trackPhotoUpdated(oldPhoto.id, {
+                            file: metadata.file,
+                            displayOrder: replaceIndex + 1
+                        });
+                    }
+
+                    photos[replaceIndex] = {
+                        ...oldPhoto,
+                        src: compressedDataUrl,
+                        file: metadata.file,
+                        name: metadata.name
+                    };
+
+                    updateGallery();
+                    replaceInput.value = '';
+                });
+            }
+        });
+    }
+
+    // ============= CHANGE TRACKING =============
+    function trackPhotoAdded(photo) {
+        changes.added.push({
+            file: photo.file,
+            displayOrder: photos.length
+        });
+    }
+
+    function trackPhotoUpdated(oldPhotoId, newPhoto) {
+        changes.updated.push({
+            photoId: oldPhotoId,
+            newFile: newPhoto.file,
+            displayOrder: newPhoto.displayOrder
+        });
+    }
+
+    function trackPhotoDeleted(photoId) {
+        changes.deleted.push(photoId);
+    }
+
+    function resetChanges() {
+        changes = {
+            added: [],
+            updated: [],
+            deleted: [],
+            reordered: []
+        };
+    }
+
+    function detectReorderChanges() {
+        changes.reordered = [];
+
+        photos.forEach((photo, currentIndex) => {
+            if (photo.id) {
+                const originalOrderValue = originalOrder.get(photo.id);
+                const currentOrder = currentIndex + 1;
+
+                if (originalOrderValue !== currentOrder) {
+                    changes.reordered.push({
+                        photoId: photo.id,
+                        newOrder: currentOrder
+                    });
+                }
+            }
+        });
+
+        return changes.reordered.length > 0;
+    }
+
+    // ============= LIGHTBOX =============
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCounter = document.getElementById('lightbox-counter');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const zoomBtn = document.getElementById('zoomBtn');
+    const slideshowBtn = document.getElementById('slideshowBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const shareBtn = document.getElementById('shareBtn');
+
+    function openLightbox(index) {
+        if (!lightbox || photos.length === 0) return;
+        currentPhotoIndex = index;
+        isZoomed = false;
+        lightboxImg.classList.remove('zoomed');
+        zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        isZoomed = false;
+        lightboxImg.classList.remove('zoomed');
+    }
+
+    function showPrevPhoto() {
+        if (photos.length === 0) return;
+        currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+        isZoomed = false;
+        lightboxImg.classList.remove('zoomed');
+        zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+    }
+
+    function showNextPhoto() {
+        if (photos.length === 0) return;
+        currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+        isZoomed = false;
+        lightboxImg.classList.remove('zoomed');
+        zoomBtn.textContent = '🔍';
+        updateLightboxImage();
+    }
+
+    function updateLightboxImage() {
+        if (photos.length === 0 || !lightboxImg || !lightboxCounter) return;
+        lightboxImg.src = photos[currentPhotoIndex].src;
+        lightboxCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+    }
+
+    // Lightbox event listeners
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+    }
+
+    if (lightboxPrev) {
+        lightboxPrev.addEventListener('click', showPrevPhoto);
+    }
+
+    if (lightboxNext) {
+        lightboxNext.addEventListener('click', showNextPhoto);
+    }
+
+    if (zoomBtn) {
+        zoomBtn.addEventListener('click', () => {
+            isZoomed = !isZoomed;
+            if (lightboxImg) {
+                lightboxImg.classList.toggle('zoomed');
+            }
+            zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
+        });
+    }
+
+    // Slideshow button
+    if (slideshowBtn) {
+        slideshowBtn.addEventListener('click', () => {
+            openSlideshow(currentPhotoIndex);
+        });
+    }
+
+    // Download button
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            if (photos.length > 0 && photos[currentPhotoIndex]) {
+                downloadImage(photos[currentPhotoIndex].src, photos[currentPhotoIndex].name || `photo-${currentPhotoIndex + 1}.jpg`);
+            }
+        });
+    }
+
+    // Share button
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            if (photos.length > 0 && photos[currentPhotoIndex]) {
+                openShareModal(photos[currentPhotoIndex].src, photos[currentPhotoIndex].name || `photo-${currentPhotoIndex + 1}.jpg`);
+            }
+        });
+    }
+
+    if (lightboxImg) {
+        lightboxImg.addEventListener('click', () => {
+            isZoomed = !isZoomed;
+            lightboxImg.classList.toggle('zoomed');
+            if (zoomBtn) {
+                zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
+            }
+        });
+    }
+
+    if (lightbox) {
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (!lightbox || !lightbox.classList.contains('active')) return;
+
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === 'ArrowLeft') showPrevPhoto();
+        if (e.key === 'ArrowRight') showNextPhoto();
     });
 
-    // Gallery save
+    // ============= UTILITY FUNCTIONS =============
+    function downloadImage(src, filename) {
+        const link = document.createElement('a');
+        link.href = src;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function openShareModal(src, filename) {
+        const shareModal = document.getElementById('shareModal');
+        const shareLink = document.getElementById('shareLink');
+
+        if (shareModal && shareLink) {
+            // Generate shareable link (you can customize this)
+            const shareableLink = `${window.location.origin}/gallery/share/${filename}`;
+            shareLink.value = shareableLink;
+
+            shareModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeShareModal() {
+        const shareModal = document.getElementById('shareModal');
+        if (shareModal) {
+            shareModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function shareToPlatform(platform, link) {
+        const encodedLink = encodeURIComponent(link);
+        const encodedText = encodeURIComponent('Check out this photo from my gallery!');
+
+        let shareUrl = '';
+
+        switch (platform) {
+            case 'messenger':
+                // Use Facebook Send Dialog for Messenger
+                shareUrl = `https://www.facebook.com/dialog/send?link=${encodedLink}&redirect_uri=${encodedLink}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodedText}%20${encodedLink}`;
+                break;
+            case 'zalo':
+                shareUrl = `https://zalo.me/share?text=${encodedText}%20${encodedLink}`;
+                break;
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedLink}`;
+                break;
+            case 'email':
+                shareUrl = `mailto:?subject=Photo from Gallery&body=${encodedText}%20${encodedLink}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedLink}`;
+                break;
+            case 'pinterest':
+                shareUrl = `https://pinterest.com/pin/create/button/?url=${encodedLink}&description=${encodedText}`;
+                break;
+            case 'threads':
+                shareUrl = `https://www.threads.net/intent/post?text=${encodedText}%20${encodedLink}`;
+                break;
+            case 'more':
+                // Use Web Share API if available
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Photo from Gallery',
+                        text: 'Check out this photo!',
+                        url: link
+                    });
+                    return;
+                }
+                break;
+        }
+
+        if (shareUrl) {
+            // Simple approach like Pixieset - just open the share URL
+            window.open(shareUrl, '_blank', 'width=600,height=400');
+        }
+    }
+
+    async function shareImage(src) {
+        if (navigator.share) {
+            try {
+                // Convert image to blob for sharing
+                const response = await fetch(src);
+                const blob = await response.blob();
+                const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
+
+                await navigator.share({
+                    title: 'Photo from Gallery',
+                    text: 'Check out this photo!',
+                    files: [file]
+                });
+            } catch (error) {
+                console.log('Error sharing:', error);
+                // Fallback to copy link
+                copyImageLink(src);
+            }
+        } else {
+            // Fallback for browsers that don't support Web Share API
+            copyImageLink(src);
+        }
+    }
+
+    function copyImageLink(src) {
+        navigator.clipboard.writeText(src).then(() => {
+            swal('Thông báo', 'Link đã được copy vào clipboard!', 'success');
+        }).catch(() => {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = src;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            swal('Thông báo', 'Link đã được copy vào clipboard!', 'success');
+        });
+    }
+
+    function openSlideshow(startIndex) {
+        if (photos.length === 0) return;
+
+        slideshowIndex = startIndex;
+        const slideshowOverlay = document.getElementById('slideshowOverlay');
+        const slideshowImg = document.getElementById('slideshow-img');
+        const slideshowCounter = document.getElementById('slideshow-counter');
+
+        if (slideshowOverlay && slideshowImg && slideshowCounter) {
+            slideshowImg.src = photos[slideshowIndex].src;
+            slideshowCounter.textContent = `${slideshowIndex + 1} / ${photos.length}`;
+            slideshowOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Start slideshow
+            startSlideshow();
+        }
+    }
+
+    function startSlideshow() {
+        if (slideshowInterval) {
+            clearInterval(slideshowInterval);
+        }
+
+        slideshowInterval = setInterval(() => {
+            slideshowIndex = (slideshowIndex + 1) % photos.length;
+            const slideshowImg = document.getElementById('slideshow-img');
+            const slideshowCounter = document.getElementById('slideshow-counter');
+
+            if (slideshowImg && slideshowCounter) {
+                slideshowImg.src = photos[slideshowIndex].src;
+                slideshowCounter.textContent = `${slideshowIndex + 1} / ${photos.length}`;
+            }
+        }, slideshowSpeed);
+    }
+
+    function stopSlideshow() {
+        if (slideshowInterval) {
+            clearInterval(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    // Slideshow controls
+    const slideshowOverlay = document.getElementById('slideshowOverlay');
+    const slideshowClose = document.getElementById('slideshow-close');
+    const slideshowPlay = document.getElementById('slideshow-play');
+    const slideshowSpeedBtn = document.getElementById('slideshow-speed');
+
+    if (slideshowClose) {
+        slideshowClose.addEventListener('click', () => {
+            if (slideshowOverlay) {
+                slideshowOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                stopSlideshow();
+            }
+        });
+    }
+
+    if (slideshowPlay) {
+        slideshowPlay.addEventListener('click', () => {
+            if (slideshowInterval) {
+                stopSlideshow();
+                slideshowPlay.textContent = '▶️ Tiếp tục';
+            } else {
+                startSlideshow();
+                slideshowPlay.textContent = '⏸️ Tạm dừng';
+            }
+        });
+    }
+
+    if (slideshowSpeedBtn) {
+        slideshowSpeedBtn.addEventListener('click', () => {
+            const speeds = [1000, 2000, 3000, 5000];
+            const currentIndex = speeds.indexOf(slideshowSpeed);
+            const nextIndex = (currentIndex + 1) % speeds.length;
+            slideshowSpeed = speeds[nextIndex];
+            slideshowSpeedBtn.textContent = `Tốc độ: ${slideshowSpeed / 1000}s`;
+
+            if (slideshowInterval) {
+                stopSlideshow();
+                startSlideshow();
+            }
+        });
+    }
+
+    // Share modal controls
+    const shareModal = document.getElementById('shareModal');
+    const shareClose = document.getElementById('shareClose');
+    const copyBtn = document.getElementById('copyBtn');
+    const sharePlatforms = document.querySelectorAll('.share-platform');
+
+    if (shareClose) {
+        shareClose.addEventListener('click', closeShareModal);
+    }
+
+    if (shareModal) {
+        shareModal.addEventListener('click', (e) => {
+            if (e.target === shareModal) {
+                closeShareModal();
+            }
+        });
+    }
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const shareLink = document.getElementById('shareLink');
+            if (shareLink) {
+                navigator.clipboard.writeText(shareLink.value).then(() => {
+                    copyBtn.textContent = 'COPIED!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'COPY';
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback for older browsers
+                    shareLink.select();
+                    document.execCommand('copy');
+                    copyBtn.textContent = 'COPIED!';
+                    setTimeout(() => {
+                        copyBtn.textContent = 'COPY';
+                    }, 2000);
+                });
+            }
+        });
+    }
+
+    sharePlatforms.forEach(platform => {
+        platform.addEventListener('click', () => {
+            const platformName = platform.dataset.platform;
+            const shareLink = document.getElementById('shareLink');
+            if (shareLink) {
+                shareToPlatform(platformName, shareLink.value);
+            }
+        });
+    });
+
+    // ============= GALLERY SAVE =============
     async function saveGallery() {
         const titleDisplay = document.getElementById('galleryTitleDisplay');
         const saveBtn = document.getElementById('saveGalleryBtn');
         const originalText = saveBtn.textContent;
 
         if (photos.length === 0) {
-            alert('Vui lòng thêm ít nhất 1 ảnh vào Gallery!');
+            swal('Thông báo', 'Vui lòng thêm ít nhất 1 ảnh vào Gallery!', 'warning');
             return;
         }
 
         if (@Model.IdGallery == 0 && !bannerFile) {
-            alert('Vui lòng chọn ảnh bìa cho Gallery!');
+            swal('Thông báo', 'Vui lòng chọn ảnh bìa cho Gallery!', 'warning');
             return;
         }
 
@@ -298,7 +1451,6 @@
         try {
             const formData = new FormData();
             formData.append('Title', titleDisplay.textContent);
-            formData.append('Description', '@Model.Description');
 
             if (bannerFile) {
                 formData.append('BannerImage', bannerFile);
@@ -354,7 +1506,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Gallery đã được cập nhật thành công!');
+                    swal('Thông báo', 'Gallery đã được cập nhật thành công!', 'success');
                     resetChanges();
                     window.location.reload();
                 } else {
@@ -363,544 +1515,110 @@
             }
         } catch (error) {
             console.error('Save gallery error:', error);
-            alert('Có lỗi xảy ra khi lưu Gallery. Vui lòng thử lại.');
+            swal('Lỗi', 'Có lỗi xảy ra khi lưu Gallery. Vui lòng thử lại.', 'error');
         } finally {
             saveBtn.disabled = false;
             saveBtn.textContent = originalText;
         }
     }
 
-    // Banner upload
-    bannerInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            compressImage(file, (compressedDataUrl, metadata) => {
-                bannerFile = metadata.file;
-                bannerImageName = metadata.name;
-                heroBannerImg.src = compressedDataUrl;
-                setTimeout(() => {
-                    heroBannerImg.classList.add('loaded');
-                }, 100);
-            });
-        }
-    };
-
-    @if (!string.IsNullOrEmpty(Model.BannerImagePath))
-    {
-        <text>
-            heroBannerImg.classList.add('loaded');
-        </text>
-    }
-
-    // Upload area
-    uploadArea.onclick = () => fileInput.click();
-    fileInput.onchange = (e) => handleFiles(e.target.files);
-
-    uploadArea.ondragover = (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    };
-
-    uploadArea.ondragleave = () => {
-        uploadArea.classList.remove('dragover');
-    };
-
-    uploadArea.ondrop = (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    };
-
-    function handleFiles(files) {
-        previewPhotos = [];
-        previewMetadata = [];
-        previewGrid.innerHTML = '';
-
-        addPhotosBtn.style.display = 'none';
-        processingIndicator.style.display = 'flex';
-
-        let processedCount = 0;
-        const totalFiles = Array.from(files).filter(file => file.type.startsWith('image/')).length;
-
-        Array.from(files).forEach((file) => {
-            if (file.type.startsWith('image/')) {
-                compressImage(file, (compressedDataUrl, metadata) => {
-                    previewPhotos.push(compressedDataUrl);
-                    previewMetadata.push(metadata);
-                    addPreview(compressedDataUrl, previewPhotos.length - 1, metadata);
-                    previewCount.textContent = previewPhotos.length;
-
-                    processedCount++;
-
-                    if (processedCount === totalFiles) {
-                        processingIndicator.style.display = 'none';
-                        addPhotosBtn.style.display = 'block';
-                    }
-                });
-            }
-        });
-
-        if (files.length > 0) {
-            previewSection.style.display = 'block';
-        }
-    }
-
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    function compressImage(file, callback) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                let width = img.width;
-                let height = img.height;
-                const maxWidth = 1920;
-                const maxHeight = 1920;
-
-                if (width > maxWidth || height > maxHeight) {
-                    if (width > height) {
-                        height = (height / width) * maxWidth;
-                        width = maxWidth;
-                    } else {
-                        width = (width / height) * maxHeight;
-                        height = maxHeight;
-                    }
-                }
-
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-                const byteString = atob(compressedDataUrl.split(',')[1]);
-                const mimeString = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
-                const ab = new ArrayBuffer(byteString.length);
-                const ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                }
-                const blob = new Blob([ab], {type: mimeString});
-                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.jpg'), {type: 'image/jpeg'});
-
-                const originalSize = file.size;
-                const compressedSize = compressedFile.size;
-
-                const metadata = {
-                    name: file.name,
-                    type: 'image/jpeg',
-                    originalSize: originalSize,
-                    compressedSize: compressedSize,
-                    dimensions: {width, height},
-                    file: compressedFile
-                };
-
-                callback(compressedDataUrl, metadata);
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function addPreview(src, index, metadata) {
-        const previewItem = document.createElement('div');
-        previewItem.className = 'preview-item';
-        previewItem.innerHTML = `
-            <img src="${src}" alt="Preview ${index + 1}">
-            <button class="preview-remove" onclick="removePreview(${index})">×</button>
-            <div class="preview-info">
-                <div class="preview-filename">${metadata.name}</div>
-                <div class="preview-size">${formatFileSize(metadata.compressedSize)} • ${metadata.type.split('/')[1].toUpperCase()}</div>
-            </div>
-        `;
-
-        const img = previewItem.querySelector('img');
-        img.onmouseenter = () => showQuickPreview(src);
-        img.onmouseleave = hideQuickPreview;
-
-        previewGrid.appendChild(previewItem);
-    }
-
-    function showQuickPreview(src) {
-        clearTimeout(quickPreviewTimeout);
-        quickPreviewTimeout = setTimeout(() => {
-            quickPreviewImg.src = src;
-            quickPreview.classList.add('active');
-        }, 500);
-    }
-
-    function hideQuickPreview() {
-        clearTimeout(quickPreviewTimeout);
-        quickPreview.classList.remove('active');
-    }
-
-    window.removePreview = function (index) {
-        previewPhotos.splice(index, 1);
-        previewMetadata.splice(index, 1);
-        updatePreviewGrid();
-
-        if (previewPhotos.length === 0) {
-            previewSection.style.display = 'none';
-        }
-    }
-
-    function updatePreviewGrid() {
-        previewGrid.innerHTML = '';
-        previewPhotos.forEach((src, index) => {
-            addPreview(src, index, previewMetadata[index]);
-        });
-        previewCount.textContent = previewPhotos.length;
-    }
-
-    addPhotosBtn.onclick = () => {
-        if (previewPhotos.length === 0) return;
-
-        const sizes = ['size-small', 'size-medium', 'size-large', 'size-xlarge'];
-
-        previewPhotos.forEach((src, index) => {
-            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
-            const newPhoto = {
-                src: src,
-                file: previewMetadata[index].file,
-                name: previewMetadata[index].name,
-                imagePath: null,
-                imageName: previewMetadata[index].name,
-                size: randomSize
-            };
-
-            photos.push(newPhoto);
-            trackPhotoAdded(newPhoto);
-        });
-
-        updateGallery();
-
-        previewPhotos = [];
-        previewMetadata = [];
-        previewGrid.innerHTML = '';
-        fileInput.value = '';
-        previewSection.style.display = 'none';
-
-        setTimeout(() => {
-            gallery.scrollIntoView({behavior: 'smooth', block: 'start'});
-        }, 100);
-    };
-
-    // FIXED: updateGallery với Masonry init đúng cách
-    function updateGallery() {
-        // Xóa tất cả photo items (giữ lại gallery-sizer)
-        const existingItems = gallery.querySelectorAll('.photo-item');
-        existingItems.forEach(item => item.remove());
-
-        photos.forEach((photo, index) => {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
-            photoItem.draggable = true;
-            photoItem.dataset.index = index;
-
-            if (photo.id) {
-                photoItem.dataset.id = photo.id;
-            }
-            
-            if (photo.size) {
-                photoItem.classList.add(photo.size);
-            }
-
-            photoItem.innerHTML = `
-                <img src="${photo.src}" alt="Photo ${index + 1}">
-                <div class="photo-overlay">
-                    <span class="photo-number">#${String(index + 1).padStart(2, '0')}</span>
-                    <div class="photo-actions">
-                        <button class="photo-action-btn replace" onclick="replacePhoto(${index})" title="Thay thế">🔄</button>
-                        <button class="photo-action-btn delete" onclick="deletePhoto(${index})" title="Xóa">🗑️</button>
-                    </div>
-                </div>
-            `;
-
-            // Drag and drop
-            photoItem.ondragstart = (e) => {
-                draggedIndex = index;
-                photoItem.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-            };
-
-            photoItem.ondragend = () => {
-                photoItem.classList.remove('dragging');
-            };
-
-            photoItem.ondragover = (e) => {
-                e.preventDefault();
-                photoItem.classList.add('drag-over');
-            };
-
-            photoItem.ondragleave = () => {
-                photoItem.classList.remove('drag-over');
-            };
-
-            photoItem.ondrop = (e) => {
-                e.preventDefault();
-                photoItem.classList.remove('drag-over');
-
-                if (draggedIndex !== null && draggedIndex !== index) {
-                    const temp = photos[draggedIndex];
-                    photos[draggedIndex] = photos[index];
-                    photos[index] = temp;
-                    updateGallery();
-                }
-            };
-
-            const img = photoItem.querySelector('img');
-            img.onclick = (e) => {
-                e.stopPropagation();
-                openLightbox(index);
-            };
-
-            gallery.appendChild(photoItem);
-        });
-
-        photoCount.textContent = photos.length;
-
-        // FIXED: Destroy và reinit Masonry đúng cách
-        if (masonryInstance) {
-            masonryInstance.destroy();
-            masonryInstance = null;
-        }
-
-        // Đợi ảnh load xong rồi mới init Masonry
-        imagesLoaded(gallery, function () {
-            masonryInstance = new Masonry(gallery, {
-                itemSelector: '.photo-item',
-                columnWidth: '.gallery-sizer',
-                percentPosition: true,
-                gutter: 4,
-                transitionDuration: '0.3s'
-            });
-        });
-    }
-
-    window.deletePhoto = function (index) {
-        if (confirm('Bạn có chắc muốn xóa ảnh này?')) {
-            const photo = photos[index];
-
-            if (photo.id) {
-                trackPhotoDeleted(photo.id);
-            }
-
-            photos.splice(index, 1);
-            updateGallery();
-        }
-    }
-
-    window.replacePhoto = function (index) {
-        replaceIndex = index;
-        replaceInput.click();
-    }
-
-    replaceInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            compressImage(file, (compressedDataUrl, metadata) => {
-                const oldPhoto = photos[replaceIndex];
-
-                if (oldPhoto.id) {
-                    trackPhotoUpdated(oldPhoto.id, {
-                        file: metadata.file,
-                        displayOrder: replaceIndex + 1
-                    });
-                }
-
-                photos[replaceIndex] = {
-                    ...oldPhoto,
-                    src: compressedDataUrl,
-                    file: metadata.file,
-                    name: metadata.name
-                };
-
-                updateGallery();
-                replaceInput.value = '';
-            });
-        }
-    };
-
-    // Tracking functions
-    function trackPhotoAdded(photo) {
-        changes.added.push({
-            file: photo.file,
-            displayOrder: photos.length
-        });
-    }
-
-    function trackPhotoUpdated(oldPhotoId, newPhoto) {
-        changes.updated.push({
-            photoId: oldPhotoId,
-            newFile: newPhoto.file,
-            displayOrder: newPhoto.displayOrder
-        });
-    }
-
-    function trackPhotoDeleted(photoId) {
-        changes.deleted.push(photoId);
-    }
-
-    function resetChanges() {
-        changes = {
-            added: [],
-            updated: [],
-            deleted: [],
-            reordered: []
-        };
-    }
-
-    function detectReorderChanges() {
-        changes.reordered = [];
-
-        photos.forEach((photo, currentIndex) => {
-            if (photo.id) {
-                const originalOrderValue = originalOrder.get(photo.id);
-                const currentOrder = currentIndex + 1;
-
-                if (originalOrderValue !== currentOrder) {
-                    changes.reordered.push({
-                        photoId: photo.id,
-                        newOrder: currentOrder
-                    });
-                }
-            }
-        });
-
-        return changes.reordered.length > 0;
-    }
-
-    // FIXED: Initialize gallery - đợi page load xong
+    // ============= INITIALIZATION =============
     @if (Model.GalleryItems != null && Model.GalleryItems.Any())
-    {
-        <text>
-            const sizes = ['size-small', 'size-medium', 'size-large', 'size-xlarge'];
+        {
+            <text>
+                const sizes = ['size-small', 'size-medium', 'size-large', 'size-xlarge'];
 
-            originalPhotos = @Html.Raw(Json.Serialize(Model.GalleryItems.OrderBy(x => x.DisplayOrder).Select(x => new
-            {
-                id = x.IdGalleryItem,
-                src = $"{@apiUrl}/assets/gallery/{@Model.IdGallery}/{x.ImagePath}",
-                imagePath = x.ImagePath,
-                imageName = x.ImageName,
-                displayOrder = x.DisplayOrder
-            })));
+                originalPhotos = @Html.Raw(Json.Serialize(Model.GalleryItems.OrderBy(x => x.DisplayOrder).Select(x => new
+                {
+                    id = x.IdGalleryItem,
+                        src = $"{@apiUrl}/assets/gallery/{@Model.IdGallery}/{x.ImagePath}",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                imagePath = x.ImagePath,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                imageName = x.ImageName,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                displayOrder = x.DisplayOrder
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })));
 
-            photos = originalPhotos.map((photo, index) => ({
-                ...photo,
-                name: photo.imageName,
+                                            photos = originalPhotos.map((photo, index) => ({
+                    ...photo,
+                    name: photo.imageName,
                 size: sizes[index % sizes.length]
-            }));
+                                            }));
 
-            originalOrder.clear();
-            photos.forEach((photo) => {
-                if (photo.id) {
+                // Track original order
+                originalOrder.clear();
+                                            photos.forEach((photo) => {
+                                                if (photo.id) {
                     originalOrder.set(photo.id, photo.displayOrder);
-                }
-            });
+                                                }
+                                            });
 
-            // FIXED: Đợi page load xong mới init gallery
-            window.addEventListener('load', function() {
-                if (typeof Masonry !== 'undefined') {
+                window.addEventListener('load', function () {
+                                                if (typeof Masonry !== 'undefined') {
                     updateGallery();
-                } else {
+                                                } else {
                     console.error('Masonry library not loaded!');
-                }
-            });
-        </text>
+                                                }
+                                            });
+            </text>
     }
-    else
-    {
-        <text>
-            window.addEventListener('load', function() {
-                if (typeof Masonry !== 'undefined') {
+        else
+        {
+            <text>
+                window.addEventListener('load', function () {
+                                                if (typeof Masonry !== 'undefined') {
                     updateGallery();
-                }
-            });
-       </text>
-    }
-
-    // Lightbox functionality
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCounter = document.getElementById('lightbox-counter');
-    const zoomBtn = document.getElementById('zoomBtn');
-
-    if (lightbox && lightboxImg && lightboxCounter && zoomBtn) {
-        document.getElementById('lightbox-close').onclick = closeLightbox;
-        document.getElementById('lightbox-prev').onclick = showPrevPhoto;
-        document.getElementById('lightbox-next').onclick = showNextPhoto;
-
-        zoomBtn.onclick = () => {
-            isZoomed = !isZoomed;
-            lightboxImg.classList.toggle('zoomed');
-            zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
-        };
-
-        lightboxImg.onclick = () => {
-            isZoomed = !isZoomed;
-            lightboxImg.classList.toggle('zoomed');
-            zoomBtn.textContent = isZoomed ? '🔍−' : '🔍';
-        };
-
-        lightbox.onclick = (e) => {
-            if (e.target === lightbox) closeLightbox();
-        };
-
-        document.addEventListener('keydown', (e) => {
-            if (!lightbox.classList.contains('active')) return;
-
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') showPrevPhoto();
-            if (e.key === 'ArrowRight') showNextPhoto();
-        });
-    }
-
-    function openLightbox(index) {
-        if (!lightbox || !lightboxImg) return;
-        currentPhotoIndex = index;
-        isZoomed = false;
-        lightboxImg.classList.remove('zoomed');
-        if (zoomBtn) zoomBtn.textContent = '🔍';
-        updateLightboxImage();
-        lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeLightbox() {
-        if (!lightbox) return;
-        lightbox.classList.remove('active');
-        document.body.style.overflow = '';
-        isZoomed = false;
-        if (lightboxImg) lightboxImg.classList.remove('zoomed');
-    }
-
-    function showPrevPhoto() {
-        currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
-        isZoomed = false;
-        if (lightboxImg) lightboxImg.classList.remove('zoomed');
-        if (zoomBtn) zoomBtn.textContent = '🔍';
-        updateLightboxImage();
-    }
-
-    function showNextPhoto() {
-        currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-        isZoomed = false;
-        if (lightboxImg) lightboxImg.classList.remove('zoomed');
-        if (zoomBtn) zoomBtn.textContent = '🔍';
-        updateLightboxImage();
-    }
-
-    function updateLightboxImage() {
-        if (photos.length === 0 || !lightboxImg || !lightboxCounter) return;
-        lightboxImg.src = photos[currentPhotoIndex].src;
-        lightboxCounter.textContent = `${currentPhotoIndex + 1} / ${photos.length}`;
+                                                }
+                                            });
+            </text>
     }
 </script>
+
+<script>
+    // View Gallery scroll functionality
+    const viewGalleryLink = document.getElementById('viewGalleryLink');
+    if (viewGalleryLink) {
+        viewGalleryLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            scrollToGallery();
+        });
+    }
+
+    // Back to Top functionality
+    const backToTopBtn = document.getElementById('backToTopBtn');
+
+    if (backToTopBtn) {
+        backToTopBtn.addEventListener('click', function () {
+            scrollToTop();
+        });
+
+        // Show/hide back to top button based on scroll position
+        window.addEventListener('scroll', function () {
+            const scrollPosition = window.pageYOffset;
+
+            // Simple logic: show when scrolled down more than 300px
+            if (scrollPosition > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+    }
+
+    function scrollToGallery() {
+        const gallerySection = document.getElementById('gallery');
+        if (gallerySection) {
+            gallerySection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
+<!-- Back to Top Button -->

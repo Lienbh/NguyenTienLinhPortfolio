@@ -20,13 +20,14 @@ namespace NguyenTienLinh.Repository
         {
             var galleries = await _context.Galleries
                 .Include(g => g.GalleryItems)
+                .OrderByDescending(g => g.CreatedDate)
                 .ToListAsync();
 
             return galleries.Select(g => new GalleryDTO
             {
                 IdGallery = g.IdGallery,
                 Title = g.Title,
-                Description = g.Description,
+                Url = g.Url,
                 CreatedDate = g.CreatedDate,
                 GalleryItems = g.GalleryItems.Select(gi => new GalleryItemDTO
                 {
@@ -42,6 +43,56 @@ namespace NguyenTienLinh.Repository
             }).ToList();
         }
 
+        public async Task<PagedResult<GalleryDTO>> GetGalleriesPagedAsync(int page, int pageSize, string? search = null)
+        {
+            var query = _context.Galleries.Include(g => g.GalleryItems).AsQueryable();
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                var searchTerm = search.Trim().ToLower();
+                query = query.Where(g => g.Title.ToLower().Contains(searchTerm) || g.Url.ToLower().Contains(searchTerm));
+            }
+
+            // Get total count
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination and ordering
+            var galleries = await query
+                .OrderByDescending(g => g.CreatedDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var data = galleries.Select(g => new GalleryDTO
+            {
+                IdGallery = g.IdGallery,
+                Title = g.Title,
+                Url = g.Url,
+                CreatedDate = g.CreatedDate,
+                GalleryItems = g.GalleryItems.Select(gi => new GalleryItemDTO
+                {
+                    IdGalleryItem = gi.IdGalleryItem,
+                    IdGallery = gi.IdGallery,
+                    ImagePath = gi.ImagePath,
+                    ImageName = gi.ImageName,
+                    Description = gi.Description,
+                    DisplayOrder = gi.DisplayOrder
+                }).OrderBy(gi => gi.DisplayOrder).ToList(),
+                BannerImagePath = g.BannerImagePath,
+                BannerImageName = g.BannerImageName
+            }).ToList();
+
+            return new PagedResult<GalleryDTO>
+            {
+                Data = data,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            };
+        }
+
         public async Task<GalleryDTO?> GetGalleryByIdAsync(int id)
         {
             var gallery = await _context.Galleries
@@ -54,7 +105,7 @@ namespace NguyenTienLinh.Repository
             {
                 IdGallery = gallery.IdGallery,
                 Title = gallery.Title,
-                Description = gallery.Description,
+                Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
                 GalleryItems = gallery.GalleryItems.Select(gi => new GalleryItemDTO
                 {
@@ -75,7 +126,7 @@ namespace NguyenTienLinh.Repository
             var gallery = new Gallery
             {
                 Title = galleryDTO.Title,
-                Description = galleryDTO.Description,
+                Url = galleryDTO.Url,
                 BannerImagePath = galleryDTO.BannerImagePath,
                 BannerImageName = galleryDTO.BannerImageName
             };
@@ -87,7 +138,7 @@ namespace NguyenTienLinh.Repository
             {
                 IdGallery = gallery.IdGallery,
                 Title = gallery.Title,
-                Description = gallery.Description,
+                Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
                 BannerImagePath = gallery.BannerImagePath,
                 BannerImageName = gallery.BannerImageName,
@@ -101,7 +152,7 @@ namespace NguyenTienLinh.Repository
             if (gallery == null) return null;
 
             gallery.Title = galleryDTO.Title;
-            gallery.Description = galleryDTO.Description;
+            gallery.Url = galleryDTO.Url;
             gallery.BannerImagePath = galleryDTO.BannerImagePath;
             gallery.BannerImageName = galleryDTO.BannerImageName;
 
@@ -111,7 +162,7 @@ namespace NguyenTienLinh.Repository
             {
                 IdGallery = gallery.IdGallery,
                 Title = gallery.Title,
-                Description = gallery.Description,
+                Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
                 BannerImagePath = gallery.BannerImagePath,
                 BannerImageName = gallery.BannerImageName,
@@ -129,12 +180,79 @@ namespace NguyenTienLinh.Repository
 
         public async Task<bool> DeleteGalleryAsync(int id)
         {
-            var gallery = await _context.Galleries.FindAsync(id);
+            var gallery = await _context.Galleries
+                .Include(g => g.GalleryItems)
+                .FirstOrDefaultAsync(g => g.IdGallery == id);
+
             if (gallery == null) return false;
 
-            _context.Galleries.Remove(gallery);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                // Delete all files from server before deleting database records
+                await DeleteGalleryFilesAsync(id, gallery);
+
+                // Delete from database
+                _context.Galleries.Remove(gallery);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting gallery {id}: {ex.Message}");
+                return false;
+            }
+        }
+
+        private async Task DeleteGalleryFilesAsync(int galleryId, Gallery gallery)
+        {
+            try
+            {
+                var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "gallery", galleryId.ToString());
+
+                // Delete banner file if exists
+                if (!string.IsNullOrEmpty(gallery.BannerImagePath))
+                {
+                    var bannerPath = Path.Combine(galleryPath, gallery.BannerImagePath);
+                    if (File.Exists(bannerPath))
+                    {
+                        File.Delete(bannerPath);
+                        Console.WriteLine($"Deleted banner file: {bannerPath}");
+                    }
+                }
+
+                // Delete all gallery item files
+                foreach (var item in gallery.GalleryItems)
+                {
+                    if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        var itemPath = Path.Combine(galleryPath, item.ImagePath);
+                        if (File.Exists(itemPath))
+                        {
+                            File.Delete(itemPath);
+                            Console.WriteLine($"Deleted gallery item file: {itemPath}");
+                        }
+                    }
+                }
+
+                // Delete the entire gallery folder if it exists and is empty
+                if (Directory.Exists(galleryPath))
+                {
+                    try
+                    {
+                        Directory.Delete(galleryPath, true);
+                        Console.WriteLine($"Deleted gallery folder: {galleryPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Could not delete gallery folder {galleryPath}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting gallery files for gallery {galleryId}: {ex.Message}");
+                throw; // Re-throw to ensure transaction rollback
+            }
         }
 
         // Gallery Item methods
@@ -209,9 +327,44 @@ namespace NguyenTienLinh.Repository
             var galleryItem = await _context.GalleryItems.FindAsync(id);
             if (galleryItem == null) return false;
 
-            _context.GalleryItems.Remove(galleryItem);
-            await _context.SaveChangesAsync();
-            return true;
+            try
+            {
+                // Delete file from server before deleting database record
+                await DeleteGalleryItemFileAsync(galleryItem);
+
+                // Delete from database
+                _context.GalleryItems.Remove(galleryItem);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting gallery item {id}: {ex.Message}");
+                return false;
+            }
+        }
+
+        private async Task DeleteGalleryItemFileAsync(GalleryItem galleryItem)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(galleryItem.ImagePath))
+                {
+                    var galleryPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "gallery", galleryItem.IdGallery.ToString());
+                    var filePath = Path.Combine(galleryPath, galleryItem.ImagePath);
+
+                    if (File.Exists(filePath))
+                    {
+                        File.Delete(filePath);
+                        Console.WriteLine($"Deleted gallery item file: {filePath}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting gallery item file for item {galleryItem.IdGalleryItem}: {ex.Message}");
+                throw; // Re-throw to ensure transaction rollback
+            }
         }
 
         // Gallery Item Position Management
@@ -365,6 +518,37 @@ namespace NguyenTienLinh.Repository
             {
                 return null;
             }
+        }
+
+        public async Task<GalleryDTO?> GetGalleryByUrlAsync(string url)
+        {
+            var gallery = await _context.Galleries
+                .Include(g => g.GalleryItems)
+                .FirstOrDefaultAsync(g => g.Url == url);
+
+            if (gallery == null) return null;
+
+            return new GalleryDTO
+            {
+                IdGallery = gallery.IdGallery,
+                Title = gallery.Title,
+                Url = gallery.Url,
+                CreatedDate = gallery.CreatedDate,
+                BannerImagePath = gallery.BannerImagePath,
+                BannerImageName = gallery.BannerImageName,
+                GalleryItems = gallery.GalleryItems
+                    .OrderBy(gi => gi.DisplayOrder)
+                    .Select(gi => new GalleryItemDTO
+                    {
+                        IdGalleryItem = gi.IdGalleryItem,
+                        IdGallery = gi.IdGallery,
+                        ImagePath = gi.ImagePath,
+                        ImageName = gi.ImageName,
+                        Description = gi.Description,
+                        DisplayOrder = gi.DisplayOrder
+                    })
+                    .ToList()
+            };
         }
 
 

@@ -5,6 +5,7 @@ namespace AppApi.IRepository
     public interface IGalleryRepo
     {
         Task<List<GalleryDTO>> GetAllGalleriesAsync();
+        Task<PagedResult<GalleryDTO>> GetGalleriesPagedAsync(int page, int pageSize, string? search = null);
         Task<GalleryDTO?> GetGalleryByIdAsync(int id);
         Task<GalleryDTO> CreateGalleryAsync(GalleryDTO galleryDTO);
         Task<GalleryDTO?> UpdateGalleryAsync(int id, GalleryDTO galleryDTO);
@@ -22,5 +23,6 @@ namespace AppApi.IRepository
         // New methods for granular operations
         Task<GalleryItemDTO?> GetGalleryItemByIdAsync(int itemId);
         Task<GalleryItemDTO> UpdateGalleryItemAsync(int itemId, GalleryItemDTO item);
+        Task<GalleryDTO?> GetGalleryByUrlAsync(string url);
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
 using System.Linq;
 
+using System.Text.RegularExpressions;
+
 namespace NguyenTienLinh.Controllers
 {
     [ApiController]
@@ -17,14 +19,109 @@ namespace NguyenTienLinh.Controllers
             _galleryRepo = galleryRepo;
         }
 
+        // Helper method to generate SEO-friendly URL from title
+        private async Task<string> GenerateUrlSlugAsync(string title)
+        {
+            if (string.IsNullOrEmpty(title))
+                return $"gallery-{DateTime.Now:yyyyMMddHHmmss}";
+
+            // Convert Vietnamese to Latin characters
+            string latinTitle = ConvertVietnameseToLatin(title);
+
+            // Convert to lowercase and replace spaces with hyphens
+            string slug = Regex.Replace(latinTitle.ToLower(), @"[^a-z0-9\s-]", "")
+                              .Replace(" ", "-")
+                              .Replace("--", "-")
+                              .Trim('-');
+
+            // Ensure slug is not empty
+            if (string.IsNullOrEmpty(slug))
+                slug = $"gallery-{DateTime.Now:yyyyMMddHHmmss}";
+
+            // Check if URL already exists and make it unique
+            string originalSlug = slug;
+            int counter = 1;
+
+            while (await _galleryRepo.GetGalleryByUrlAsync($"/{slug}") != null)
+            {
+                slug = $"{originalSlug}-{counter}";
+                counter++;
+            }
+
+            return $"/{slug}";
+        }
+
+        // Helper method to convert Vietnamese characters to Latin
+        private string ConvertVietnameseToLatin(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            // Vietnamese to Latin mapping
+            var vietnameseMap = new Dictionary<string, string>
+            {
+                // Lowercase vowels with diacritics
+                {"à", "a"}, {"á", "a"}, {"ạ", "a"}, {"ả", "a"}, {"ã", "a"},
+                {"â", "a"}, {"ầ", "a"}, {"ấ", "a"}, {"ậ", "a"}, {"ẩ", "a"}, {"ẫ", "a"},
+                {"ă", "a"}, {"ằ", "a"}, {"ắ", "a"}, {"ặ", "a"}, {"ẳ", "a"}, {"ẵ", "a"},
+                {"è", "e"}, {"é", "e"}, {"ẹ", "e"}, {"ẻ", "e"}, {"ẽ", "e"},
+                {"ê", "e"}, {"ề", "e"}, {"ế", "e"}, {"ệ", "e"}, {"ể", "e"}, {"ễ", "e"},
+                {"ì", "i"}, {"í", "i"}, {"ị", "i"}, {"ỉ", "i"}, {"ĩ", "i"},
+                {"ò", "o"}, {"ó", "o"}, {"ọ", "o"}, {"ỏ", "o"}, {"õ", "o"},
+                {"ô", "o"}, {"ồ", "o"}, {"ố", "o"}, {"ộ", "o"}, {"ổ", "o"}, {"ỗ", "o"},
+                {"ơ", "o"}, {"ờ", "o"}, {"ớ", "o"}, {"ợ", "o"}, {"ở", "o"}, {"ỡ", "o"},
+                {"ù", "u"}, {"ú", "u"}, {"ụ", "u"}, {"ủ", "u"}, {"ũ", "u"},
+                {"ư", "u"}, {"ừ", "u"}, {"ứ", "u"}, {"ự", "u"}, {"ử", "u"}, {"ữ", "u"},
+                {"ỳ", "y"}, {"ý", "y"}, {"ỵ", "y"}, {"ỷ", "y"}, {"ỹ", "y"},
+                {"đ", "d"},
+                
+                // Uppercase vowels with diacritics
+                {"À", "A"}, {"Á", "A"}, {"Ạ", "A"}, {"Ả", "A"}, {"Ã", "A"},
+                {"Â", "A"}, {"Ầ", "A"}, {"Ấ", "A"}, {"Ậ", "A"}, {"Ẩ", "A"}, {"Ẫ", "A"},
+                {"Ă", "A"}, {"Ằ", "A"}, {"Ắ", "A"}, {"Ặ", "A"}, {"Ẳ", "A"}, {"Ẵ", "A"},
+                {"È", "E"}, {"É", "E"}, {"Ẹ", "E"}, {"Ẻ", "E"}, {"Ẽ", "E"},
+                {"Ê", "E"}, {"Ề", "E"}, {"Ế", "E"}, {"Ệ", "E"}, {"Ể", "E"}, {"Ễ", "E"},
+                {"Ì", "I"}, {"Í", "I"}, {"Ị", "I"}, {"Ỉ", "I"}, {"Ĩ", "I"},
+                {"Ò", "O"}, {"Ó", "O"}, {"Ọ", "O"}, {"Ỏ", "O"}, {"Õ", "O"},
+                {"Ô", "O"}, {"Ồ", "O"}, {"Ố", "O"}, {"Ộ", "O"}, {"Ổ", "O"}, {"Ỗ", "O"},
+                {"Ơ", "O"}, {"Ờ", "O"}, {"Ớ", "O"}, {"Ợ", "O"}, {"Ở", "O"}, {"Ỡ", "O"},
+                {"Ù", "U"}, {"Ú", "U"}, {"Ụ", "U"}, {"Ủ", "U"}, {"Ũ", "U"},
+                {"Ư", "U"}, {"Ừ", "U"}, {"Ứ", "U"}, {"Ự", "U"}, {"Ử", "U"}, {"Ữ", "U"},
+                {"Ỳ", "Y"}, {"Ý", "Y"}, {"Ỵ", "Y"}, {"Ỷ", "Y"}, {"Ỹ", "Y"},
+                {"Đ", "D"},
+                
+                // Special characters and punctuation
+                {"?", ""}, {"!", ""}, {".", ""}, {",", ""}, {":", ""}, {";", ""},
+                {"'", ""}, {"\"", ""}, {"(", ""}, {")", ""}, {"[", ""}, {"]", ""},
+                {"{", ""}, {"}", ""}, {"<", ""}, {">", ""}, {"|", ""}, {"\\", ""},
+                {"/", ""}, {"@", ""}, {"#", ""}, {"$", ""}, {"%", ""}, {"^", ""},
+                {"&", ""}, {"*", ""}, {"+", ""}, {"=", ""}, {"~", ""}, {"`", ""},
+                {" ", "-"}, {"_", "-"}, {"—", "-"}, {"–", "-"}, {"-", "-"}
+            };
+
+            foreach (var kvp in vietnameseMap)
+            {
+                text = text.Replace(kvp.Key, kvp.Value);
+            }
+
+            // Additional cleanup for multiple consecutive hyphens and special cases
+            text = Regex.Replace(text, @"-+", "-"); // Replace multiple hyphens with single hyphen
+            text = text.Trim('-'); // Remove leading/trailing hyphens
+
+            return text;
+        }
+
         // GET: api/Gallery
         [HttpGet]
-        public async Task<ActionResult<List<GalleryDTO>>> GetAllGalleries()
+        public async Task<ActionResult<PagedResult<GalleryDTO>>> GetAllGalleries(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null)
         {
             try
             {
-                var galleries = await _galleryRepo.GetAllGalleriesAsync();
-                return Ok(galleries);
+                var result = await _galleryRepo.GetGalleriesPagedAsync(page, pageSize, search);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -42,6 +139,26 @@ namespace NguyenTienLinh.Controllers
                 if (gallery == null)
                 {
                     return NotFound($"Gallery with ID {id} not found.");
+                }
+
+                return Ok(gallery);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // GET: api/Gallery/by-url/dam-cuoi-bach-hong-lien
+        [HttpGet("by-url/{url}")]
+        public async Task<ActionResult<GalleryDTO>> GetGalleryByUrl(string url)
+        {
+            try
+            {
+                var gallery = await _galleryRepo.GetGalleryByUrlAsync($"/{url}");
+                if (gallery == null)
+                {
+                    return NotFound($"Gallery with URL /{url} not found.");
                 }
 
                 return Ok(gallery);
@@ -262,7 +379,7 @@ namespace NguyenTienLinh.Controllers
                 var galleryData = new GalleryDTO
                 {
                     Title = request.Title,
-                    Description = request.Description,
+                    Url = await GenerateUrlSlugAsync(request.Title.Trim()),
                     CreatedDate = DateTime.Now
                 };
 
@@ -350,7 +467,7 @@ namespace NguyenTienLinh.Controllers
                 {
                     // Step 1: Update gallery basic info
                     existingGallery.Title = request.Title;
-                    existingGallery.Description = request.Description;
+                    existingGallery.Url = await GenerateUrlSlugAsync(request.Title.Trim());
 
                     // Step 2: Upload new banner if provided
                     if (request.BannerImage != null && request.BannerImage.Length > 0)
@@ -489,7 +606,7 @@ namespace NguyenTienLinh.Controllers
                 {
                     // 1. Update basic info
                     existingGallery.Title = request.Title;
-                    existingGallery.Description = request.Description;
+                    existingGallery.Url = await GenerateUrlSlugAsync(request.Title);
 
                     // 2. Handle banner update
                     if (request.BannerImage != null && request.BannerImage.Length > 0)
@@ -654,7 +771,6 @@ namespace NguyenTienLinh.Controllers
     public class CreateGalleryWithFilesRequest
     {
         public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; }
         public IFormFile? BannerImage { get; set; }
         public List<IFormFile>? GalleryImages { get; set; }
     }
@@ -662,7 +778,6 @@ namespace NguyenTienLinh.Controllers
     public class UpdateGalleryWithFilesRequest
     {
         public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; }
         public IFormFile? BannerImage { get; set; }
         public List<IFormFile>? GalleryImages { get; set; }
     }
@@ -670,7 +785,6 @@ namespace NguyenTienLinh.Controllers
     public class GalleryUpdateRequest
     {
         public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; }
         public IFormFile? BannerImage { get; set; }
 
         // Simple arrays for FormData binding

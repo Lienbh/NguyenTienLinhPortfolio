@@ -1,140 +1,242 @@
 ﻿@model BuildingBlock.DTOS.AboutDTO
 @{
-ViewData["Title"] = "About Me";
+    ViewData["Title"] = "About Me";
     Layout = "_Layout";
     var userName = (string)TempData["currentUser"];
+    var isLoggedIn = !string.IsNullOrEmpty(userName);
 }
-<div class="wrapper container">
-    <div class="heading">About
 
-        <span class="btn-edit" data-bs-toggle="modal" data-bs-target="#update" data-param-id="@Model.IdAbout" data-param-img="@Model.AboutImage">@(userName != null ? "( Edit About )" : "")</span>
+<link rel="stylesheet" href="~/css/about-me.css" />
 
-    </div>
-   
-    <div class="row">
-        <div class="col-lg-6 d-flex justify-content-center mb-3">
-            <img src="~/assets/ntlinh/@Model.AboutImage" style="width: 75%" class="profileImg" />
-            
-        </div>
-        <div class="col-lg-6 d-flex flex-column justify-content-center">
-            <div>
-                <p class="aboutText">Hi, I'm Linh.</p>
-                <p class="aboutText">
-                    I'm a videographer based in Hanoi.
-                </p>
+<div class="about-hero">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-header">
+                <h1 class="about-title">
+                    About Me
+
+                </h1>
+                @if (isLoggedIn)
+                {
+                    <button class="edit-btn" data-bs-toggle="modal" data-bs-target="#update" data-param-id="@Model.IdAbout"
+                        data-param-img="@Model.AboutImage">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                }
             </div>
-            <div class="d-flex flex-lg-row flex-column mx-auto mx-lg-0 mt-5">
-                <h4 class="cta">Connect with me</h4>
-                <div class="ps-3 d-flex justify-content-center align-items-center">
-                    <div class="px-2">
-                        <a href="https://www.facebook.com/ltnguyen198">
-                            <img src="~/assets/footer-icon-link/2021_Facebook_icon.svg.png" alt="" style=" width: 32px" />
-                        </a>
+
+            <div class="about-body">
+                <div class="profile-section">
+                    <div class="profile-image-container">
+                        <img src="~/assets/ntlinh/@Model.AboutImage" alt="Profile" class="profile-image" />
+                        <div class="image-overlay">
+                            <span class="overlay-text">Professional Videographer</span>
+                        </div>
                     </div>
-                    <div class="px-2">
-                        <a href="https://www.youtube.com/channel/UCZVfd9rhMUgZT9V6nBsfabw">
-                            <img src="~/assets/footer-icon-link/youtube-logo.webp" alt="" style="width: 32px" />
-                        </a>
+                </div>
+
+                <div class="content-section">
+                    <div class="intro-text">
+                        <h2 class="greeting">Hi, I'm <span class="highlight">Linh</span></h2>
+                        <p class="description">
+                            I'm a passionate videographer based in Hanoi, specializing in capturing life's most precious
+                            moments through the lens of creativity and storytelling.
+                        </p>
                     </div>
-                    <div class="px-2" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <span>
-                            <img src="~/assets/footer-icon-link/Icon_of_Zalo.svg.webp" alt="" style=" width: 32px" />
-                        </span>
+
+                    <div class="connect-section">
+                        <h3 class="connect-title">Let's Connect</h3>
+                        <div class="social-links">
+                            <a href="https://www.facebook.com/ltnguyen198" class="social-link facebook" target="_blank">
+                                <i class="fab fa-facebook-f"></i>
+                                <span>Facebook</span>
+                            </a>
+                            <a href="https://www.youtube.com/channel/UCZVfd9rhMUgZT9V6nBsfabw"
+                                class="social-link youtube" target="_blank">
+                                <i class="fab fa-youtube"></i>
+                                <span>YouTube</span>
+                            </a>
+                            <button class="social-link zalo" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                <i class="fas fa-comments"></i>
+                                <span>Zalo</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="exampleModalLabel">
-                                        Connect with me
-                                    </h1>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="~/assets/ntlinh/zalo-qr.jpg" alt="" style="width: 100% " />
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        Đóng
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zalo QR Modal -->
+<div class="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modern-modal">
+            <div class="modal-header">
+                <h1 class="modal-title" id="exampleModalLabel">
+                    <i class="fas fa-qrcode"></i>
+                    Connect with me
+                </h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="qr-container">
+                    <img src="~/assets/ntlinh/zalo-qr.jpg" alt="Zalo QR Code" class="qr-image" />
+                    <p class="qr-text">Scan to connect on Zalo</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Update Profile Modal -->
+<div class="modal fade" id="update" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+        <form asp-action="UpdateAbout" class="update-form">
+            <div class="modal-content modern-modal">
+                <div class="modal-header">
+                    <h1 class="modal-title" id="updateModalLabel">
+                        <i class="fas fa-camera"></i>
+                        Update Profile Photo
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="upload-section">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h3 class="upload-title">Choose New Photo</h3>
+                                <p class="upload-text">Click to browse or drag & drop your image here</p>
+                                <input name="photo" type="file" id="fileInput" class="file-input" accept="image/*" />
+                                <button type="button" class="upload-btn"
+                                    onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-plus"></i>
+                                    Select Image
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="preview-section" id="previewSection" style="display: none;">
+                            <div class="preview-container">
+                                <img id="preview-img" src="" alt="Preview" class="preview-image" />
+                                <div class="preview-overlay">
+                                    <button type="button" class="change-btn"
+                                        onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-edit"></i>
+                                        Change
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade " id="update" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <form asp-action="UpdateAbout" style="width:100%">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Cập nhật ảnh</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                 
-                    <div class="form-group">
-                        <label class="control-label">Đường dẫn</label>
-                        <input name="photo" type="file"  id="fileInput" class="form-control" />
-                        <input name="AboutImage" hidden type="text" id="AboutImage" class="form-control" />
-                        <input name="IdAbout" hidden type="text" id="IdAbout" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label">Ảnh</label>
-                        <div class="bg-light">
-                            <img id="preview-img" src="" style="width:100%" alt="" class="mw-100 mh-100">
-                        </div>
-                    </div>
+
+                    <!-- Hidden inputs -->
+                    <input name="AboutImage" type="hidden" id="AboutImage" />
+                    <input name="IdAbout" type="hidden" id="IdAbout" />
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
-                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i>
+                        Save Changes
+                    </button>
                 </div>
             </div>
-         
-            
-            
         </form>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script type="text/javascript">
-$(document).ready(function () {
+    $(document).ready(function () {
+        // Modal show event
         $('#update').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget);
             var valueImg = button.data('param-img');
             var id = button.data('param-id');
-            var modal = $(this);
+
+            // Reset UI
+            $('#uploadArea').show();
+            $('#previewSection').hide();
+            $('#fileInput').val('');
+
+            // Set current image as preview
             $('#preview-img').attr('src', `/assets/ntlinh/${valueImg}`);
             $('#IdAbout').val(id);
-        });
-        $('#fileInput').on('change', function (event) {
-            var formData = new FormData();
-            var file = $('#fileInput')[0].files[0];
-            if (file) {
-                formData.append('photo', file);
-            }
-            $.ajax({
-                url: '@Url.Action("HandleFileChange", "AboutMe")',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    console.log(response.imgNew);
-                    $('#preview-img').attr('src', `/assets/ntlinh/${response.imgNew}`);
-                    $('#AboutImage').val(response.imgNew);
-                },
-                error: function (xhr, status, error) {
-                }
-            });
+            $('#AboutImage').val(valueImg);
         });
 
+        // File input change
+        $('#fileInput').on('change', function (event) {
+            var file = this.files[0];
+            if (file) {
+                // Show preview immediately
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#preview-img').attr('src', e.target.result);
+                    $('#uploadArea').hide();
+                    $('#previewSection').show();
+                };
+                reader.readAsDataURL(file);
+
+                // Upload to server
+                var formData = new FormData();
+                formData.append('photo', file);
+
+                $.ajax({
+                    url: '@Url.Action("HandleFileChange", "AboutMe")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $('#AboutImage').val(response.imgNew);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Upload failed:', error);
+                    }
+                });
+            }
+        });
+
+        // Drag and drop functionality
+        $('#uploadArea').on('dragover', function (e) {
+            e.preventDefault();
+            $(this).addClass('drag-over');
+        });
+
+        $('#uploadArea').on('dragleave', function (e) {
+            e.preventDefault();
+            $(this).removeClass('drag-over');
+        });
+
+        $('#uploadArea').on('drop', function (e) {
+            e.preventDefault();
+            $(this).removeClass('drag-over');
+
+            var files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                $('#fileInput')[0].files = files;
+                $('#fileInput').trigger('change');
+            }
+        });
+
+        // Click to upload
+        $('#uploadArea').on('click', function () {
+            $('#fileInput').click();
+        });
     });
-    </script>
+</script>
 @section scripts {
     <script type="text/javascript">
         @Html.Raw(ViewBag.SweetAlertShowMessage)

@@ -15,6 +15,16 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 app.MapControllerRoute(
+    name: "gallery-index",
+    pattern: "Gallery",
+    defaults: new { controller = "Gallery", action = "Index" });
+
+app.MapControllerRoute(
+    name: "gallery-slug",
+    pattern: "Gallery/{slug}",
+    defaults: new { controller = "Gallery", action = "View" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

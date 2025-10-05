@@ -12,7 +12,7 @@ namespace NguyenTienLinh.Models
         public string Title { get; set; } = string.Empty;
 
         [StringLength(500)]
-        public string? Description { get; set; }
+        public string? Url { get; set; }
 
         [Required]
         public DateTime CreatedDate { get; set; } = DateTime.Now;

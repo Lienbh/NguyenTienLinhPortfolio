@@ -4,15 +4,22 @@ using WebApp.Models;
 
 namespace WebApp.Controllers
 {
+
     public class GalleryController : Controller
     {
         private readonly ILogger<GalleryController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly System.Text.Json.JsonSerializerOptions _jsonOptions;
 
         public GalleryController(ILogger<GalleryController> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;
+            _jsonOptions = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            };
         }
 
         public IActionResult Index()
@@ -24,72 +31,13 @@ namespace WebApp.Controllers
             }
 
             var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery";
+            ViewBag.ApiUrl = apiUrl;
 
-            try
-            {
-                var response = client.GetFromJsonAsync<List<GalleryDTO>>(requestURL).Result;
-                return View(response ?? new List<GalleryDTO>());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching galleries");
-                return View(new List<GalleryDTO>());
-            }
+            // Return empty model - all data will be loaded via AJAX
+            return View(new List<GalleryDTO>());
         }
 
-        public IActionResult Details(int id)
-        {
-            var getCurrentUser = HttpContext.Session.GetString("currentUser");
-            if (!string.IsNullOrEmpty(getCurrentUser))
-            {
-                TempData["currentUser"] = getCurrentUser;
-            }
 
-            var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery/{id}";
-
-            try
-            {
-                var response = client.GetFromJsonAsync<GalleryDTO>(requestURL).Result;
-                if (response == null)
-                {
-                    return NotFound();
-                }
-                return View(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching gallery details");
-                return NotFound();
-            }
-        }
-
-        public IActionResult Manage()
-        {
-            var getCurrentUser = HttpContext.Session.GetString("currentUser");
-            if (!string.IsNullOrEmpty(getCurrentUser))
-            {
-                TempData["currentUser"] = getCurrentUser;
-            }
-
-            var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery";
-
-            try
-            {
-                var response = client.GetFromJsonAsync<List<GalleryDTO>>(requestURL).Result;
-                return View(response ?? new List<GalleryDTO>());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error fetching galleries for management");
-                return View(new List<GalleryDTO>());
-            }
-        }
 
         [HttpPost]
         public IActionResult CreateGallery(GalleryDTO galleryDTO)
@@ -228,7 +176,6 @@ namespace WebApp.Controllers
                 {
                     IdGallery = 0,
                     Title = "Gallery Mới",
-                    Description = "",
                     CreatedDate = DateTime.Now,
                     BannerImagePath = "",
                     BannerImageName = "",
@@ -254,6 +201,50 @@ namespace WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching gallery for management");
+                return NotFound();
+            }
+        }
+
+        public async Task<IActionResult> View(string slug)
+        {
+            if (string.IsNullOrEmpty(slug))
+            {
+                return NotFound();
+            }
+
+            var getCurrentUser = HttpContext.Session.GetString("currentUser");
+            if (!string.IsNullOrEmpty(getCurrentUser))
+            {
+                TempData["currentUser"] = getCurrentUser;
+            }
+
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            ViewBag.ApiUrl = apiUrl;
+
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery/by-url/{Uri.EscapeDataString(slug)}";
+
+            try
+            {
+                var response = await client.GetAsync(requestURL);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return NotFound();
+                }
+
+                var jsonContent = await response.Content.ReadAsStringAsync();
+                var gallery = System.Text.Json.JsonSerializer.Deserialize<GalleryDTO>(jsonContent, _jsonOptions);
+
+                if (gallery == null)
+                {
+                    return NotFound();
+                }
+
+                return View("Manager", gallery);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching gallery by slug: {Slug}", slug);
                 return NotFound();
             }
         }

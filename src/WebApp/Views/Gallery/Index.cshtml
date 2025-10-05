@@ -2,105 +2,435 @@
 @{
     ViewData["Title"] = "Gallery";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var apiUrl = ViewBag.ApiUrl;
+    var isLoggedIn = !string.IsNullOrEmpty(TempData["currentUser"]?.ToString());
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <h4 class="page-title">Gallery</h4>
+<link rel="stylesheet" href="~/css/gallery-index.css" />
+
+<!-- Hero Section -->
+<div class="gallery-hero">
+    <div class="hero-content">
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search galleries..." class="search-input">
+                <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
+                <button id="searchBtn" class="search-btn">🔍</button>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        @if (Model != null && Model.Any())
+        @if (isLoggedIn)
         {
-            @foreach (var gallery in Model)
-            {
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card gallery-card">
-                        <div class="card-body">
-                            <h5 class="card-title">@gallery.Title</h5>
-                            <p class="card-text">@gallery.Description</p>
-                            <div class="gallery-preview">
-                                @if (gallery.GalleryItems != null && gallery.GalleryItems.Any())
-                                {
-                                    <div class="row">
-                                        @foreach (var item in gallery.GalleryItems.Take(4))
-                                        {
-                                            <div class="col-6 mb-2">
-                                                <img src="~/assets/gallery/@item.ImagePath" alt="@item.ImageName"
-                                                    class="img-fluid rounded preview-img"
-                                                    style="height: 80px; object-fit: cover; width: 100%;">
-                                            </div>
-                                        }
-                                    </div>
-                                    @if (gallery.GalleryItems.Count > 4)
-                                    {
-                                        <div class="text-center mt-2">
-                                            <small class="text-muted">+@(gallery.GalleryItems.Count - 4) more images</small>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="text-center text-muted">
-                                        <i class="fas fa-images fa-3x"></i>
-                                        <p>No images yet</p>
-                                    </div>
-                                }
-                            </div>
-                            <div class="mt-3">
-                                <a href="@Url.Action("Details", "Gallery", new { id = gallery.IdGallery })"
-                                    class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye"></i> View Gallery
-                                </a>
-                                <small class="text-muted d-block mt-1">
-                                    Created: @gallery.CreatedDate.ToString("MMM dd, yyyy")
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="text-center">
-                    <i class="fas fa-images fa-5x text-muted mb-3"></i>
-                    <h4 class="text-muted">No Galleries Found</h4>
-                    <p class="text-muted">There are no galleries available at the moment.</p>
-                </div>
-            </div>
+            <a href="/Gallery/Manager/0" class="hero-btn">
+                <span>+</span> CREATE NEW GALLERY
+            </a>
         }
     </div>
 </div>
 
-<style>
-    .gallery-card {
-        transition: transform 0.3s ease;
-        height: 100%;
+<!-- Gallery Grid -->
+<div class="gallery-container">
+    <div class="gallery-grid" id="galleryGrid">
+        <!-- Initial galleries will be loaded here -->
+    </div>
+</div>
+
+<!-- Loading Indicator -->
+<div id="loadingIndicator" class="loading-indicator" style="display: none;">
+    <div class="loading-spinner"></div>
+    <span>Loading more galleries...</span>
+</div>
+
+<!-- End of Results -->
+<div id="endOfResults" class="end-of-results" style="display: none;">
+    <span>You've reached the end of the gallery collection</span>
+</div>
+
+<script>
+    // Infinite Scroll and Search functionality
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMorePages = true;
+    let currentSearch = '';
+    const pageSize = 10;
+    const apiUrl = '@apiUrl';
+
+    // DOM Elements
+    const galleryGrid = document.querySelector('.gallery-grid');
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const endOfResults = document.getElementById('endOfResults');
+
+    // Search functionality
+    function performSearch(searchTerm) {
+        console.log('Performing search for:', searchTerm);
+
+        // Trim and normalize search term
+        currentSearch = searchTerm.trim();
+        currentPage = 1;
+        hasMorePages = true;
+
+        // Clear existing galleries
+        if (galleryGrid) {
+            galleryGrid.innerHTML = '';
+        }
+
+        // Hide end of results
+        if (endOfResults) {
+            endOfResults.style.display = 'none';
+        }
+
+        // Update UI
+        updateSearchUI();
+
+        // Load first page with search
+        loadGalleries(true);
     }
 
-    .gallery-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    // Clear search functionality
+    function clearSearch() {
+        console.log('Clearing search');
+
+        // Clear search input
+        if (searchInput) {
+            searchInput.value = '';
+        }
+
+        // Reset search state
+        currentSearch = '';
+        currentPage = 1;
+        hasMorePages = true;
+
+        // Clear existing galleries
+        if (galleryGrid) {
+            galleryGrid.innerHTML = '';
+        }
+
+        // Hide end of results
+        if (endOfResults) {
+            endOfResults.style.display = 'none';
+        }
+
+        // Update UI
+        updateSearchUI();
+
+        // Load first page without search
+        loadGalleries();
     }
 
-    .preview-img {
-        transition: transform 0.3s ease;
+    // Update search UI
+    function updateSearchUI() {
+        if (clearSearchBtn) {
+            if (currentSearch) {
+                clearSearchBtn.style.display = 'flex';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+        }
     }
 
-    .preview-img:hover {
-        transform: scale(1.05);
+    // Load galleries function
+    async function loadGalleries(isSearch = false) {
+        if (isLoading || !hasMorePages) return;
+
+        isLoading = true;
+
+        // Only show loading indicator if we're not on the first page
+        if (currentPage > 1 && loadingIndicator) {
+            loadingIndicator.style.display = 'flex';
+        }
+
+        try {
+            const searchParam = currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '';
+            const url = `${apiUrl}/api/Gallery?page=${currentPage}&pageSize=${pageSize}${searchParam}`;
+
+            console.log('Fetching URL:', url);
+
+            const response = await fetch(url);
+            const result = await response.json();
+
+            console.log('API Response:', result);
+
+            // API returns PagedResult directly, not wrapped in success field
+            if (result && result.data) {
+                const galleries = result.data;
+
+                if (galleries.length === 0 && currentPage === 1) {
+                    // No results found
+                    showEmptyState();
+                } else if (galleries.length > 0) {
+                    // Add galleries to grid
+                    galleries.forEach(gallery => {
+                        addGalleryToGrid(gallery);
+                    });
+
+                    // Check if there are more pages
+                    hasMorePages = result.hasNextPage;
+                    currentPage++;
+
+                    if (!hasMorePages) {
+                        showEndOfResults();
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error loading galleries:', error);
+        } finally {
+            isLoading = false;
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+        }
     }
 
-    .gallery-preview {
-        min-height: 160px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    // Add gallery to grid
+    function addGalleryToGrid(gallery) {
+        if (!galleryGrid) return;
+
+        const galleryItem = document.createElement('div');
+        galleryItem.className = 'gallery-item';
+        galleryItem.setAttribute('data-gallery-id', gallery.idGallery);
+
+        const isLoggedIn = @isLoggedIn.ToString().ToLower();
+
+        galleryItem.innerHTML = `
+            <div class="gallery-banner">
+                ${gallery.bannerImagePath ?
+                `<img src="${apiUrl}/assets/gallery/${gallery.idGallery}/${gallery.bannerImagePath}" alt="${gallery.title}" class="banner-img">` :
+                `<div class="banner-placeholder"><span class="placeholder-icon">📸</span></div>`
+            }
+                
+                <div class="gallery-overlay">
+                    <div class="gallery-info">
+                        <h3 class="gallery-title">${gallery.title.toUpperCase()}</h3>
+                        <div class="gallery-meta">
+                            <span class="photo-count">📸 ${gallery.galleryItems.length} Photos</span>
+                            <span class="gallery-date">${new Date(gallery.createdDate).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <div class="gallery-actions">
+                            <a href="${isLoggedIn ? `/Gallery/Manager/${gallery.idGallery}` : `/Gallery/${gallery.url?.replace('/', '') || 'Manager/' + gallery.idGallery}`}" class="action-btn">
+                                ${isLoggedIn ? 'MANAGE' : 'VIEW GALLERY'}
+                            </a>
+                            ${isLoggedIn ?
+                `<button class="delete-btn" onclick="deleteGallery(${gallery.idGallery}, '${gallery.title}')" title="Xóa Gallery">
+                                    🗑️
+                                </button>` : ''
+            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-grid">
+                ${gallery.galleryItems.length > 0 ?
+                gallery.galleryItems.slice(0, 5).map(item =>
+                    `<div class="preview-item">
+                            <img src="${apiUrl}/assets/gallery/${gallery.idGallery}/${item.imagePath}" alt="${item.imageName}" class="preview-img">
+                        </div>`
+                ).join('') +
+                (gallery.galleryItems.length > 5 ?
+                    `<div class="preview-item more-count"><span class="more-text">+${gallery.galleryItems.length - 5}</span></div>` : '')
+                :
+                `<div class="empty-preview">
+                        <span class="empty-icon">📷</span>
+                        <span class="empty-text">No photos yet</span>
+                    </div>`
+            }
+            </div>
+        `;
+
+        galleryGrid.appendChild(galleryItem);
     }
-</style>
+
+    // Show empty state
+    function showEmptyState() {
+        if (galleryGrid) {
+            galleryGrid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-content">
+                        <div class="empty-icon">📸</div>
+                        <h2 class="empty-title">No Galleries Found</h2>
+                        <p class="empty-subtitle">Try adjusting your search terms</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Show end of results
+    function showEndOfResults() {
+        if (endOfResults) {
+            endOfResults.style.display = 'block';
+        }
+    }
+
+    // Delete gallery function
+    async function deleteGallery(galleryId, galleryTitle) {
+        // Check if SweetAlert is loaded
+        if (typeof Swal === 'undefined') {
+            // Fallback to native confirm
+            if (!confirm(`Bạn có chắc chắn muốn xóa gallery "${galleryTitle}"?\n\nHành động này sẽ xóa:\n- Tất cả ảnh trong gallery\n- Banner image\n- Toàn bộ thư mục gallery\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
+                return;
+            }
+        } else {
+            // Show SweetAlert confirmation dialog
+            const result = await Swal.fire({
+                title: 'Xác nhận xóa Gallery',
+                html: `
+                    <div style="text-align: left; margin: 20px 0;">
+                        <p><strong>Bạn có chắc chắn muốn xóa gallery "${galleryTitle}"?</strong></p>
+                        <br>
+                        <p>Hành động này sẽ xóa:</p>
+                        <ul style="margin-left: 20px;">
+                            <li>Tất cả ảnh trong gallery</li>
+                            <li>Banner image</li>
+                            <li>Toàn bộ thư mục gallery</li>
+                        </ul>
+                        <br>
+                        <p style="color: #dc3545; font-weight: bold;">⚠️ Hành động này KHÔNG THỂ HOÀN TÁC!</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa Gallery',
+                cancelButtonText: 'Hủy',
+                reverseButtons: true,
+                focusCancel: true
+            });
+
+            if (!result.isConfirmed) {
+                return;
+            }
+        }
+
+        try {
+            // Show loading
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Đang xóa...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+
+            const response = await fetch(`${apiUrl}/api/Gallery/${galleryId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                // Remove gallery from UI
+                const galleryElement = document.querySelector(`[data-gallery-id="${galleryId}"]`);
+                if (galleryElement) {
+                    galleryElement.remove();
+                }
+
+                // Show success message
+                if (typeof Swal !== 'undefined') {
+                    await Swal.fire({
+                        title: 'Thành công!',
+                        text: `Gallery "${galleryTitle}" đã được xóa thành công!`,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    alert(`Gallery "${galleryTitle}" đã được xóa thành công!`);
+                }
+
+                // Refresh the page to update the list
+                location.reload();
+            } else {
+                const errorText = await response.text();
+                if (typeof Swal !== 'undefined') {
+                    await Swal.fire({
+                        title: 'Lỗi!',
+                        text: `Lỗi khi xóa gallery: ${errorText}`,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    alert(`Lỗi khi xóa gallery: ${errorText}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error deleting gallery:', error);
+            if (typeof Swal !== 'undefined') {
+                await Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                alert('Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.');
+            }
+        }
+    }
+
+    // Event Listeners
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            const searchTerm = searchInput ? searchInput.value.trim() : '';
+            if (searchTerm) {
+                performSearch(searchTerm);
+            }
+        });
+    }
+
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', () => {
+            clearSearch();
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    performSearch(searchTerm);
+                }
+            }
+        });
+
+        // Show/hide clear button based on input
+        searchInput.addEventListener('input', () => {
+            updateSearchUI();
+        });
+    }
+
+    // Infinite scroll
+    window.addEventListener('scroll', () => {
+        if (hasMorePages && window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+            loadGalleries();
+        }
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Always start fresh with client-side loading
+        currentPage = 1;
+        hasMorePages = true;
+        currentSearch = '';
+
+        // Clear any existing content
+        if (galleryGrid) {
+            galleryGrid.innerHTML = '';
+        }
+
+        // Load first page
+        loadGalleries();
+    });
+</script>
