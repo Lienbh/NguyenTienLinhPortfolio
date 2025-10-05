@@ -34,7 +34,78 @@
 <!-- Gallery Grid -->
 <div class="gallery-container">
     <div class="gallery-grid" id="galleryGrid">
-        <!-- Initial galleries will be loaded here -->
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var gallery in Model)
+            {
+                <div class="gallery-item" data-gallery-id="@gallery.IdGallery">
+                    <div class="gallery-banner">
+                        @if (!string.IsNullOrEmpty(gallery.BannerImagePath))
+                        {
+                            <img src="@(cdnUrl)/assets/gallery/@gallery.IdGallery/@gallery.BannerImagePath" alt="@gallery.Title" class="banner-img">
+                        }
+                        else
+                        {
+                            <div class="banner-placeholder"><span class="placeholder-icon">📸</span></div>
+                        }
+                        
+                        <div class="gallery-overlay">
+                            <div class="gallery-info">
+                                <h3 class="gallery-title">@gallery.Title.ToUpper()</h3>
+                                <div class="gallery-meta">
+                                    <span class="photo-count">📸 @gallery.GalleryItems.Count Photos</span>
+                                    <span class="gallery-date">@gallery.CreatedDate.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="gallery-actions">
+                                    <a href="@(isLoggedIn ? $"/Gallery/Manager/{gallery.IdGallery}" : $"/Gallery/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")" class="action-btn">
+                                        @(isLoggedIn ? "MANAGE" : "VIEW GALLERY")
+                                    </a>
+                                    @if (isLoggedIn)
+                                    {
+                                        <button class="delete-btn" onclick="deleteGallery(@gallery.IdGallery, '@gallery.Title')" title="Xóa Gallery">
+                                            🗑️
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-grid">
+                        @if (gallery.GalleryItems.Any())
+                        {
+                            @foreach (var item in gallery.GalleryItems.Take(5))
+                            {
+                                <div class="preview-item">
+                                    <img src="@(cdnUrl)/assets/gallery/@gallery.IdGallery/@item.ImagePath" alt="@item.ImageName" class="preview-img">
+                                </div>
+                            }
+                            @if (gallery.GalleryItems.Count > 5)
+                            {
+                                <div class="preview-item more-count"><span class="more-text">+@(gallery.GalleryItems.Count - 5)</span></div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="empty-preview">
+                                <span class="empty-icon">📷</span>
+                                <span class="empty-text">No photos yet</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-content">
+                    <div class="empty-icon">📸</div>
+                    <h2 class="empty-title">No Galleries Found</h2>
+                    <p class="empty-subtitle">No galleries available at the moment</p>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -278,11 +349,16 @@
     // Update load more button visibility
     function updateLoadMoreButton() {
         if (loadMoreBtn) {
-            if (hasMorePages) {
+            // Check if we have exactly 10 galleries (full page) - might have more
+            const currentGalleryCount = galleryGrid ? galleryGrid.querySelectorAll('.gallery-item').length : 0;
+            
+            if (hasMorePages && currentGalleryCount >= 10) {
                 loadMoreBtn.style.display = 'block';
             } else {
                 loadMoreBtn.style.display = 'none';
-                showEndOfResults();
+                if (!hasMorePages) {
+                    showEndOfResults();
+                }
             }
         }
     }
@@ -378,8 +454,8 @@
                         alert(`Gallery "${galleryTitle}" đã được xóa thành công!`);
                     }
 
-                    // Refresh the page to update the list
-                    location.reload();
+                    // Update load more button visibility after deletion
+                    updateLoadMoreButton();
                 } else {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -448,19 +524,15 @@
         });
     }
 
-    // Initial load
+    // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
-        // Always start fresh with client-side loading
-        currentPage = 1;
+        // Set initial state for load more functionality
+        currentPage = 2; // Start from page 2 since page 1 is already loaded server-side
         hasMorePages = true;
         currentSearch = '';
 
-        // Clear any existing content
-        if (galleryGrid) {
-            galleryGrid.innerHTML = '';
-        }
-
-        // Load first page
-        loadGalleries();
+        // Check if we need to show load more button
+        // This will be determined by the server-side data
+        updateLoadMoreButton();
     });
 </script>

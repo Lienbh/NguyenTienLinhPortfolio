@@ -22,7 +22,7 @@ namespace WebApp.Controllers
             };
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var getCurrentUser = HttpContext.Session.GetString("currentUser");
             if (!string.IsNullOrEmpty(getCurrentUser))
@@ -35,8 +35,31 @@ namespace WebApp.Controllers
             ViewBag.ApiUrl = apiUrl;
             ViewBag.CdnUrl = cdnUrl;
 
-            // Return empty model - all data will be loaded via AJAX
-            return View(new List<GalleryDTO>());
+            try
+            {
+                // Load initial galleries from backend
+                HttpClient client = new HttpClient();
+                string requestURL = $"{apiUrl}/api/Gallery?page=1&pageSize=10";
+
+                var response = await client.GetAsync(requestURL);
+                var jsonContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var pagedResult = System.Text.Json.JsonSerializer.Deserialize<PagedResult<GalleryDTO>>(jsonContent, _jsonOptions);
+                    return View(pagedResult?.Data ?? new List<GalleryDTO>());
+                }
+                else
+                {
+                    _logger.LogError("Failed to load galleries: {StatusCode} - {Content}", response.StatusCode, jsonContent);
+                    return View(new List<GalleryDTO>());
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading galleries in Index action");
+                return View(new List<GalleryDTO>());
+            }
         }
 
         // Endpoint for loading galleries via AJAX
