@@ -42,13 +42,14 @@
                     <div class="gallery-banner">
                         @if (!string.IsNullOrEmpty(gallery.BannerImagePath))
                         {
-                            <img src="@(cdnUrl)/assets/gallery/@gallery.IdGallery/@gallery.BannerImagePath" alt="@gallery.Title" class="banner-img">
+                            <img src="@(cdnUrl)/assets/gallery/@gallery.IdGallery/@gallery.BannerImagePath" alt="@gallery.Title"
+                                class="banner-img">
                         }
                         else
                         {
                             <div class="banner-placeholder"><span class="placeholder-icon">📸</span></div>
                         }
-                        
+
                         <div class="gallery-overlay">
                             <div class="gallery-info">
                                 <h3 class="gallery-title">@gallery.Title.ToUpper()</h3>
@@ -57,12 +58,14 @@
                                     <span class="gallery-date">@gallery.CreatedDate.ToString("dd/MM/yyyy")</span>
                                 </div>
                                 <div class="gallery-actions">
-                                    <a href="@(isLoggedIn ? $"/Gallery/Manager/{gallery.IdGallery}" : $"/Gallery/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")" class="action-btn">
+                                    <a href="@(isLoggedIn ? $"/Gallery/Manager/{gallery.IdGallery}" : $"/Gallery/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")"
+                                        class="action-btn">
                                         @(isLoggedIn ? "MANAGE" : "VIEW GALLERY")
                                     </a>
                                     @if (isLoggedIn)
                                     {
-                                        <button class="delete-btn" onclick="deleteGallery(@gallery.IdGallery, '@gallery.Title')" title="Xóa Gallery">
+                                        <button class="delete-btn" onclick="deleteGallery(@gallery.IdGallery, '@gallery.Title')"
+                                            title="Xóa Gallery">
                                             🗑️
                                         </button>
                                     }
@@ -70,29 +73,8 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="preview-grid">
-                        @if (gallery.GalleryItems.Any())
-                        {
-                            @foreach (var item in gallery.GalleryItems.Take(5))
-                            {
-                                <div class="preview-item">
-                                    <img src="@(cdnUrl)/assets/gallery/@gallery.IdGallery/@item.ImagePath" alt="@item.ImageName" class="preview-img">
-                                </div>
-                            }
-                            @if (gallery.GalleryItems.Count > 5)
-                            {
-                                <div class="preview-item more-count"><span class="more-text">+@(gallery.GalleryItems.Count - 5)</span></div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="empty-preview">
-                                <span class="empty-icon">📷</span>
-                                <span class="empty-text">No photos yet</span>
-                            </div>
-                        }
-                    </div>
+
+
                 </div>
             }
         }
@@ -310,22 +292,7 @@
                 </div>
             </div>
             
-            <div class="preview-grid">
-                ${gallery.galleryItems.length > 0 ?
-                gallery.galleryItems.slice(0, 5).map(item =>
-                    `<div class="preview-item">
-                            <img src="${cdnUrl}/assets/gallery/${gallery.idGallery}/${item.imagePath}" alt="${item.imageName}" class="preview-img">
-                        </div>`
-                ).join('') +
-                (gallery.galleryItems.length > 5 ?
-                    `<div class="preview-item more-count"><span class="more-text">+${gallery.galleryItems.length - 5}</span></div>` : '')
-                :
-                `<div class="empty-preview">
-                        <span class="empty-icon">📷</span>
-                        <span class="empty-text">No photos yet</span>
-                    </div>`
-            }
-            </div>
+            
         `;
 
         galleryGrid.appendChild(galleryItem);
@@ -351,7 +318,7 @@
         if (loadMoreBtn) {
             // Check if we have exactly 10 galleries (full page) - might have more
             const currentGalleryCount = galleryGrid ? galleryGrid.querySelectorAll('.gallery-item').length : 0;
-            
+
             if (hasMorePages && currentGalleryCount >= 10) {
                 loadMoreBtn.style.display = 'block';
             } else {

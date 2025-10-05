@@ -636,11 +636,6 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        180deg,
-        rgba(0, 0, 0, 0.6) 0%,
-        rgba(0, 0, 0, 0.8) 100%
-    );
     opacity: 0;
     transition: opacity 0.4s;
     display: flex;
@@ -1047,6 +1042,19 @@ body {
 
     .gallery-container {
         padding: 40px 10px 80px;
+    }
+
+    .gallery-container {
+        padding: 40px 10px 80px;
+    }
+
+    .photo-item.size-small img,
+    .photo-item.size-medium img,
+    .photo-item.size-large img,
+    .photo-item.size-xlarge img {
+        height: 100% !important;
+        width: 100%;
+        margin-bottom: 12px;
     }
 }
 
