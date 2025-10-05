@@ -1,12 +1,14 @@
 version: '3.8'
 services:
   ntlapi:
+    platform: linux/amd64
     image: bachhonglien/src-ntlapi:latest
     build:
       context: .
       dockerfile: NguyenTienLinh/Dockerfile
 
   ntlwebapp:
+    platform: linux/amd64
     image: bachhonglien/src-ntlwebapp:latest
     build:
       context: .
