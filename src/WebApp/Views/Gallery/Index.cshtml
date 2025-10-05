@@ -48,7 +48,7 @@
 <div id="endOfResults" class="end-of-results" style="display: none;">
     <span>You've reached the end of the gallery collection</span>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Infinite Scroll and Search functionality
     let currentPage = 1;
@@ -136,7 +136,7 @@
     }
 
     // Load galleries function
-    async function loadGalleries(isSearch = false) {
+    function loadGalleries(isSearch = false) {
         if (isLoading || !hasMorePages) return;
 
         isLoading = true;
@@ -146,47 +146,50 @@
             loadingIndicator.style.display = 'flex';
         }
 
-        try {
-            const searchParam = currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '';
-            const url = `${apiUrl}/api/Gallery?page=${currentPage}&pageSize=${pageSize}${searchParam}`;
+        const searchParam = currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '';
+        const url = `@Url.Action("LoadGalleries", "Gallery")?page=${currentPage}&pageSize=${pageSize}${searchParam}`;
 
-            console.log('Fetching URL:', url);
+        console.log('Fetching URL:', url);
 
-            const response = await fetch(url);
-            const result = await response.json();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (result) {
+                console.log('API Response:', result);
 
-            console.log('API Response:', result);
+                // API returns PagedResult directly, not wrapped in success field
+                if (result && result.data) {
+                    const galleries = result.data;
 
-            // API returns PagedResult directly, not wrapped in success field
-            if (result && result.data) {
-                const galleries = result.data;
+                    if (galleries.length === 0 && currentPage === 1) {
+                        // No results found
+                        showEmptyState();
+                    } else if (galleries.length > 0) {
+                        // Add galleries to grid
+                        galleries.forEach(gallery => {
+                            addGalleryToGrid(gallery);
+                        });
 
-                if (galleries.length === 0 && currentPage === 1) {
-                    // No results found
-                    showEmptyState();
-                } else if (galleries.length > 0) {
-                    // Add galleries to grid
-                    galleries.forEach(gallery => {
-                        addGalleryToGrid(gallery);
-                    });
+                        // Check if there are more pages
+                        hasMorePages = result.hasNextPage;
+                        currentPage++;
 
-                    // Check if there are more pages
-                    hasMorePages = result.hasNextPage;
-                    currentPage++;
-
-                    if (!hasMorePages) {
-                        showEndOfResults();
+                        if (!hasMorePages) {
+                            showEndOfResults();
+                        }
                     }
                 }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error loading galleries:', error);
+            },
+            complete: function () {
+                isLoading = false;
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
             }
-        } catch (error) {
-            console.error('Error loading galleries:', error);
-        } finally {
-            isLoading = false;
-            if (loadingIndicator) {
-                loadingIndicator.style.display = 'none';
-            }
-        }
+        });
     }
 
     // Add gallery to grid
@@ -271,7 +274,7 @@
     }
 
     // Delete gallery function
-    async function deleteGallery(galleryId, galleryTitle) {
+    function deleteGallery(galleryId, galleryTitle) {
         // Check if SweetAlert is loaded
         if (typeof Swal === 'undefined') {
             // Fallback to native confirm
@@ -280,7 +283,7 @@
             }
         } else {
             // Show SweetAlert confirmation dialog
-            const result = await Swal.fire({
+            Swal.fire({
                 title: 'Xác nhận xóa Gallery',
                 html: `
                     <div style="text-align: left; margin: 20px 0;">
@@ -304,81 +307,85 @@
                 cancelButtonText: 'Hủy',
                 reverseButtons: true,
                 focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performDelete(galleryId, galleryTitle);
+                }
             });
-
-            if (!result.isConfirmed) {
-                return;
-            }
+            return;
         }
 
-        try {
-            // Show loading
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Đang xóa...',
-                    text: 'Vui lòng chờ trong giây lát',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-            }
+        // If using native confirm and confirmed
+        performDelete(galleryId, galleryTitle);
+    }
 
-            const response = await fetch(`${apiUrl}/api/Gallery/${galleryId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
+    function performDelete(galleryId, galleryTitle) {
+        // Show loading
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Đang xóa...',
+                text: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
+        }
 
-            if (response.ok) {
-                // Remove gallery from UI
-                const galleryElement = document.querySelector(`[data-gallery-id="${galleryId}"]`);
-                if (galleryElement) {
-                    galleryElement.remove();
-                }
+        $.ajax({
+            url: '@Url.Action("DeleteGallery", "Gallery")',
+            type: 'POST',
+            data: { id: galleryId },
+            success: function (result) {
+                if (result.success) {
+                    // Remove gallery from UI
+                    const galleryElement = document.querySelector(`[data-gallery-id="${galleryId}"]`);
+                    if (galleryElement) {
+                        galleryElement.remove();
+                    }
 
-                // Show success message
-                if (typeof Swal !== 'undefined') {
-                    await Swal.fire({
-                        title: 'Thành công!',
-                        text: `Gallery "${galleryTitle}" đã được xóa thàsnh công!`,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
+                    // Show success message
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Thành công!',
+                            text: `Gallery "${galleryTitle}" đã được xóa thành công!`,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        alert(`Gallery "${galleryTitle}" đã được xóa thành công!`);
+                    }
+
+                    // Refresh the page to update the list
+                    location.reload();
                 } else {
-                    alert(`Gallery "${galleryTitle}" đã được xóa thành công!`);
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: `Lỗi khi xóa gallery: ${result.error || 'Unknown error'}`,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        alert(`Lỗi khi xóa gallery: ${result.error || 'Unknown error'}`);
+                    }
                 }
-
-                // Refresh the page to update the list
-                location.reload();
-            } else {
-                const errorText = await response.text();
+            },
+            error: function (xhr, status, error) {
+                console.error('Error deleting gallery:', error);
                 if (typeof Swal !== 'undefined') {
-                    await Swal.fire({
+                    Swal.fire({
                         title: 'Lỗi!',
-                        text: `Lỗi khi xóa gallery: ${errorText}`,
+                        text: 'Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.',
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
                 } else {
-                    alert(`Lỗi khi xóa gallery: ${errorText}`);
+                    alert('Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.');
                 }
             }
-        } catch (error) {
-            console.error('Error deleting gallery:', error);
-            if (typeof Swal !== 'undefined') {
-                await Swal.fire({
-                    title: 'Lỗi!',
-                    text: 'Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            } else {
-                alert('Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.');
-            }
-        }
+        });
     }
 
     // Event Listeners

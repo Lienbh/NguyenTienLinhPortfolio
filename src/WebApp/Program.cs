@@ -25,6 +25,11 @@ app.MapControllerRoute(
     defaults: new { controller = "Gallery", action = "View" });
 
 app.MapControllerRoute(
+    name: "gallery-load",
+    pattern: "Gallery/LoadGalleries",
+    defaults: new { controller = "Gallery", action = "LoadGalleries" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 

@@ -551,6 +551,16 @@ namespace NguyenTienLinh.Repository
             };
         }
 
+        public async Task<bool> IsTitleExistsAsync(string title, int? excludeId = null)
+        {
+            var query = _context.Galleries.Where(g => g.Title.ToLower() == title.ToLower());
 
+            if (excludeId.HasValue)
+            {
+                query = query.Where(g => g.IdGallery != excludeId.Value);
+            }
+
+            return await query.AnyAsync();
+        }
     }
 }

@@ -39,6 +39,162 @@ namespace WebApp.Controllers
             return View(new List<GalleryDTO>());
         }
 
+        // Endpoint for loading galleries via AJAX
+        [HttpGet("LoadGalleries")]
+        public async Task<IActionResult> LoadGalleries(int page = 1, int pageSize = 10, string? search = null)
+        {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery?page={page}&pageSize={pageSize}";
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                requestURL += $"&search={Uri.EscapeDataString(search.Trim())}";
+            }
+
+            try
+            {
+                var response = await client.GetFromJsonAsync<PagedResult<GalleryDTO>>(requestURL);
+                if (response != null)
+                {
+                    return Json(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading galleries");
+                return Json(new { error = "Failed to load galleries" });
+            }
+
+            return Json(new { error = "No data found" });
+        }
+
+        // Endpoint for deleting galleries via AJAX
+        [HttpPost("DeleteGallery")]
+        public async Task<IActionResult> DeleteGallery(int id)
+        {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery/{id}";
+
+            try
+            {
+                var response = await client.DeleteAsync(requestURL);
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    var errorText = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, error = errorText });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting gallery {Id}", id);
+                return Json(new { success = false, error = "Failed to delete gallery" });
+            }
+        }
+
+        // Endpoint for creating gallery with files via AJAX
+        [HttpPost("CreateGalleryWithFiles")]
+        public async Task<IActionResult> CreateGalleryWithFiles()
+        {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery/create-with-files";
+
+            try
+            {
+                var formData = new MultipartFormDataContent();
+
+                // Get form data from request
+                foreach (var key in Request.Form.Keys)
+                {
+                    formData.Add(new StringContent(Request.Form[key]), key);
+                }
+
+                // Get files from request
+                foreach (var file in Request.Form.Files)
+                {
+                    var fileContent = new StreamContent(file.OpenReadStream());
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                    formData.Add(fileContent, file.Name, file.FileName);
+                }
+
+                var response = await client.PostAsync(requestURL, formData);
+                var resultString = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Parse JSON string to object
+                    var resultObject = System.Text.Json.JsonSerializer.Deserialize<object>(resultString);
+                    return Json(resultObject);
+                }
+                else
+                {
+                    // Parse error JSON string to object
+                    var errorObject = System.Text.Json.JsonSerializer.Deserialize<object>(resultString);
+                    return Json(errorObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating gallery with files");
+                return Json(new { success = false, error = "Failed to create gallery" });
+            }
+        }
+
+        // Endpoint for updating gallery with changes via AJAX
+        [HttpPut("UpdateGalleryWithChanges/{id}")]
+        public async Task<IActionResult> UpdateGalleryWithChanges(int id)
+        {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery/update-with-changes/{id}";
+
+            try
+            {
+                var formData = new MultipartFormDataContent();
+
+                // Get form data from request
+                foreach (var key in Request.Form.Keys)
+                {
+                    formData.Add(new StringContent(Request.Form[key]), key);
+                }
+
+                // Get files from request
+                foreach (var file in Request.Form.Files)
+                {
+                    var fileContent = new StreamContent(file.OpenReadStream());
+                    fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+                    formData.Add(fileContent, file.Name, file.FileName);
+                }
+
+                var response = await client.PutAsync(requestURL, formData);
+                var resultString = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Parse JSON string to object
+                    var resultObject = System.Text.Json.JsonSerializer.Deserialize<object>(resultString);
+                    return Json(resultObject);
+                }
+                else
+                {
+                    // Parse error JSON string to object
+                    var errorObject = System.Text.Json.JsonSerializer.Deserialize<object>(resultString);
+                    return Json(errorObject);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating gallery with changes {Id}", id);
+                return Json(new { success = false, error = "Failed to update gallery" });
+            }
+        }
+
 
 
         [HttpPost]
@@ -121,44 +277,6 @@ namespace WebApp.Controllers
             }
         }
 
-        public IActionResult DeleteGallery(int id)
-        {
-            var getCurrentUser = HttpContext.Session.GetString("currentUser");
-            if (!string.IsNullOrEmpty(getCurrentUser))
-            {
-                TempData["currentUser"] = getCurrentUser;
-            }
-
-            var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery/{id}";
-
-            try
-            {
-                var response = client.DeleteAsync(requestURL).Result;
-
-                string requestGetURL = $"{apiUrl}/api/Gallery";
-                var galleries = client.GetFromJsonAsync<List<GalleryDTO>>(requestGetURL).Result ?? new List<GalleryDTO>();
-
-                if (response.StatusCode != System.Net.HttpStatusCode.NoContent)
-                {
-                    ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                        "Xóa gallery thất bại", SweetAlertMessageType.error);
-                    return View("Manage", galleries);
-                }
-
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Xóa gallery thành công", SweetAlertMessageType.success);
-                return View("Manage", galleries);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting gallery");
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Xóa gallery thất bại", SweetAlertMessageType.error);
-                return RedirectToAction("Manage");
-            }
-        }
 
         public IActionResult Manager(int? id)
         {

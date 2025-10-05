@@ -375,6 +375,12 @@ namespace NguyenTienLinh.Controllers
         {
             try
             {
+                // Check if title already exists
+                if (await _galleryRepo.IsTitleExistsAsync(request.Title.Trim()))
+                {
+                    return BadRequest(new { success = false, message = "Tiêu đề gallery đã tồn tại. Vui lòng chọn tiêu đề khác." });
+                }
+
                 // Step 1: Create gallery first
                 var galleryData = new GalleryDTO
                 {
@@ -459,6 +465,12 @@ namespace NguyenTienLinh.Controllers
                 if (existingGallery == null)
                 {
                     return NotFound("Gallery not found");
+                }
+
+                // Check if title already exists (excluding current gallery)
+                if (await _galleryRepo.IsTitleExistsAsync(request.Title.Trim(), id))
+                {
+                    return BadRequest(new { success = false, message = "Tiêu đề gallery đã tồn tại. Vui lòng chọn tiêu đề khác." });
                 }
 
                 var uploadedFiles = new List<string>();
