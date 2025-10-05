@@ -17,7 +17,14 @@ namespace NguyenTienLinh.Context
             if (!optionsBuilder.IsConfigured)
             {
                 var connectionString = _configuration.GetConnectionString("Conn");
-                optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionString, options =>
+                {
+                    options.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    options.CommandTimeout(60);
+                });
             }
         }
 

@@ -8,7 +8,7 @@ services:
 #      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
     volumes:
       - ${HOME}/.aspnet/https:/https:ro
-      - ./NguyenTienLinh/wwwroot:/app/wwwroot
+      - ./NguyenTienLinh/wwwroot:/app/wwwroot:rw
     ports:
       - "7130:80"    # Add this to expose HTTPS port 443
     networks:

@@ -180,25 +180,32 @@ namespace NguyenTienLinh.Repository
 
         public async Task<bool> DeleteGalleryAsync(int id)
         {
-            var gallery = await _context.Galleries
-                .Include(g => g.GalleryItems)
-                .FirstOrDefaultAsync(g => g.IdGallery == id);
-
-            if (gallery == null) return false;
-
             try
             {
+                var gallery = await _context.Galleries
+                    .Include(g => g.GalleryItems)
+                    .FirstOrDefaultAsync(g => g.IdGallery == id);
+
+                if (gallery == null)
+                {
+                    Console.WriteLine($"Gallery with ID {id} not found");
+                    return false;
+                }
+
                 // Delete all files from server before deleting database records
                 await DeleteGalleryFilesAsync(id, gallery);
 
                 // Delete from database
                 _context.Galleries.Remove(gallery);
                 await _context.SaveChangesAsync();
+
+                Console.WriteLine($"Successfully deleted gallery {id}");
                 return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error deleting gallery {id}: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return false;
             }
         }

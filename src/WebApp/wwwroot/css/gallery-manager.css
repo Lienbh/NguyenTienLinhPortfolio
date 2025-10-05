@@ -848,9 +848,10 @@ body {
     display: flex;
     gap: 32px;
     align-items: center;
+    min-width: 350px;
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(20px);
-    padding: 16px 32px;
+    padding: 16px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }

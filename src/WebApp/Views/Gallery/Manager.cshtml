@@ -277,7 +277,7 @@
             <button class="lightbox-btn" id="zoomBtn" title="Zoom">🔍</button>
             <button class="lightbox-btn" id="slideshowBtn" title="Slideshow">▶️</button>
             <button class="lightbox-btn" id="downloadBtn" title="Tải xuống">📥</button>
-            <button class="lightbox-btn" id="shareBtn" title="Chia sẻ">📤</button>
+            <button class="lightbox-btn" id="shareBtn" title="Chia sẻ">🔗</button>
         </div>
     </div>
 </div>
@@ -1519,7 +1519,6 @@
                 contentType: false,
                 success: function(result) {
                     if (result.success) {
-                        Swal.fire('Thông báo', 'Gallery đã được cập nhật thành công!', 'success');
                         resetChanges();
                         window.location.reload();
                     } else {

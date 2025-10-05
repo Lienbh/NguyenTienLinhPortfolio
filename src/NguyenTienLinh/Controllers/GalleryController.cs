@@ -220,16 +220,22 @@ namespace NguyenTienLinh.Controllers
         {
             try
             {
+                Console.WriteLine($"Attempting to delete gallery {id}");
+
                 var result = await _galleryRepo.DeleteGalleryAsync(id);
                 if (!result)
                 {
+                    Console.WriteLine($"Gallery with ID {id} not found or deletion failed");
                     return NotFound($"Gallery with ID {id} not found.");
                 }
 
+                Console.WriteLine($"Successfully deleted gallery {id}");
                 return NoContent();
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error deleting gallery {id}: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

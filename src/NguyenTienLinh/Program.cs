@@ -42,8 +42,17 @@ namespace NguyenTienLinh
 
             // Add services
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<AppDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Conn")));
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("Conn"), sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                    sqlOptions.CommandTimeout(60);
+                });
+            });
             builder.Services.AddControllers();
             builder.Services.AddTransient<IAboutsRepos, AboutRepo>();
             builder.Services.AddTransient<ICategoriesRepo, CategoriesRepos>();
