@@ -17,18 +17,18 @@ app.UseSession();
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "gallery-index",
-    pattern: "Gallery",
-    defaults: new { controller = "Gallery", action = "Index" });
+    pattern: "Photo",
+    defaults: new { controller = "Photo", action = "Index" });
 
 app.MapControllerRoute(
     name: "gallery-slug",
-    pattern: "Gallery/{slug}",
-    defaults: new { controller = "Gallery", action = "View" });
+    pattern: "Photo/{slug}",
+    defaults: new { controller = "Photo", action = "View" });
 
 app.MapControllerRoute(
     name: "gallery-load",
-    pattern: "Gallery/LoadGalleries",
-    defaults: new { controller = "Gallery", action = "LoadGalleries" });
+    pattern: "Photo/LoadGalleries",
+    defaults: new { controller = "Photo", action = "LoadGalleries" });
 
 app.MapControllerRoute(
     name: "default",

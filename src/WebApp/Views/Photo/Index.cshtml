@@ -1,6 +1,6 @@
 @model List<BuildingBlock.DTOS.GalleryDTO>
 @{
-    ViewData["Title"] = "Gallery";
+    ViewData["Title"] = "Photos";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var apiUrl = ViewBag.ApiUrl;
     var cdnUrl = ViewBag.CdnUrl;
@@ -16,7 +16,7 @@
         <!-- Search Bar -->
         <div class="search-container">
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search galleries..." class="search-input">
+                <input type="text" id="searchInput" placeholder="Search photos..." class="search-input">
                 <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
                 <button id="searchBtn" class="search-btn">🔍</button>
             </div>
@@ -24,14 +24,14 @@
 
         @if (isLoggedIn)
         {
-            <a href="/Gallery/Manager/0" class="hero-btn">
-                <span>+</span> CREATE NEW GALLERY
+            <a href="/Photo/Manager/0" class="hero-btn">
+                <span>+</span> CREATE NEW PHOTO
             </a>
         }
     </div>
 </div>
 
-<!-- Gallery Grid -->
+<!-- Photo Grid -->
 <div class="gallery-container">
     <div class="gallery-grid" id="galleryGrid">
         @if (Model != null && Model.Any())
@@ -58,14 +58,14 @@
                                     <span class="gallery-date">@gallery.CreatedDate.ToString("dd/MM/yyyy")</span>
                                 </div>
                                 <div class="gallery-actions">
-                                    <a href="@(isLoggedIn ? $"/Gallery/Manager/{gallery.IdGallery}" : $"/Gallery/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")"
+                                    <a href="@(isLoggedIn ? $"/Photo/Manager/{gallery.IdGallery}" : $"/Photo/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")"
                                         class="action-btn">
-                                        @(isLoggedIn ? "MANAGE" : "VIEW GALLERY")
+                                        @(isLoggedIn ? "MANAGE" : "VIEW PHOTO")
                                     </a>
                                     @if (isLoggedIn)
                                     {
-                                        <button class="delete-btn" onclick="deleteGallery(@gallery.IdGallery, '@gallery.Title')"
-                                            title="Xóa Gallery">
+                                        <button class="delete-btn" onclick="deletePhoto(@gallery.IdGallery, '@gallery.Title')"
+                                            title="Xóa Photo">
                                             🗑️
                                         </button>
                                     }
@@ -83,8 +83,8 @@
             <div class="empty-state">
                 <div class="empty-content">
                     <div class="empty-icon">📸</div>
-                    <h2 class="empty-title">No Galleries Found</h2>
-                    <p class="empty-subtitle">No galleries available at the moment</p>
+                    <h2 class="empty-title">No Photos Found</h2>
+                    <p class="empty-subtitle">No photos available at the moment</p>
                 </div>
             </div>
         }
@@ -94,14 +94,14 @@
 <!-- Load More Button -->
 <div class="load-more-container">
     <button id="loadMoreBtn" class="load-more-btn" style="display: none;">
-        <span class="btn-text">Load More Galleries</span>
+        <span class="btn-text">Load More Photos</span>
         <span class="btn-spinner" style="display: none;">⏳</span>
     </button>
 </div>
 
 <!-- End of Results -->
 <div id="endOfResults" class="end-of-results" style="display: none;">
-    <span>You've reached the end of the gallery collection</span>
+    <span>You've reached the end of the Photo collection</span>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -206,7 +206,7 @@
         }
 
         const searchParam = currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : '';
-        const url = `@Url.Action("LoadGalleries", "Gallery")?page=${currentPage}&pageSize=${pageSize}${searchParam}`;
+        const url = `@Url.Action("LoadGalleries", "Photo")?page=${currentPage}&pageSize=${pageSize}${searchParam}`;
 
         console.log('Fetching URL:', url);
 
@@ -226,7 +226,7 @@
                     } else if (galleries.length > 0) {
                         // Add galleries to grid
                         galleries.forEach(gallery => {
-                            addGalleryToGrid(gallery);
+                            addPhotoToGrid(gallery);
                         });
 
                         // Check if there are more pages
@@ -254,8 +254,8 @@
         });
     }
 
-    // Add gallery to grid
-    function addGalleryToGrid(gallery) {
+    // Add photo to grid
+    function addPhotoToGrid(gallery) {
         if (!galleryGrid) return;
 
         const galleryItem = document.createElement('div');
@@ -279,11 +279,11 @@
                             <span class="gallery-date">${new Date(gallery.createdDate).toLocaleDateString('vi-VN')}</span>
                         </div>
                         <div class="gallery-actions">
-                            <a href="${isLoggedIn ? `/Gallery/Manager/${gallery.idGallery}` : `/Gallery/${gallery.url?.replace('/', '') || 'Manager/' + gallery.idGallery}`}" class="action-btn">
-                                ${isLoggedIn ? 'MANAGE' : 'VIEW GALLERY'}
+                            <a href="${isLoggedIn ? `/Photo/Manager/${gallery.idGallery}` : `/Photo/${gallery.url?.replace('/', '') || 'Manager/' + gallery.idGallery}`}" class="action-btn">
+                                ${isLoggedIn ? 'MANAGE' : 'VIEW PHOTO'}
                             </a>
                             ${isLoggedIn ?
-                `<button class="delete-btn" onclick="deleteGallery(${gallery.idGallery}, '${gallery.title}')" title="Xóa Gallery">
+                `<button class="delete-btn" onclick="deletePhoto(${gallery.idGallery}, '${gallery.title}')" title="Xóa Photo">
                                     🗑️
                                 </button>` : ''
             }
@@ -305,7 +305,7 @@
                 <div class="empty-state">
                     <div class="empty-content">
                         <div class="empty-icon">📸</div>
-                        <h2 class="empty-title">No Galleries Found</h2>
+                        <h2 class="empty-title">No Photos Found</h2>
                         <p class="empty-subtitle">Try adjusting your search terms</p>
                     </div>
                 </div>
@@ -337,27 +337,27 @@
         }
     }
 
-    // Delete gallery function
-    function deleteGallery(galleryId, galleryTitle) {
+    // Delete photo function
+    function deletePhoto(galleryId, galleryTitle) {
         // Check if SweetAlert is loaded
         if (typeof Swal === 'undefined') {
             // Fallback to native confirm
-            if (!confirm(`Bạn có chắc chắn muốn xóa gallery "${galleryTitle}"?\n\nHành động này sẽ xóa:\n- Tất cả ảnh trong gallery\n- Banner image\n- Toàn bộ thư mục gallery\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa photo "${galleryTitle}"?\n\nHành động này sẽ xóa:\n- Tất cả ảnh trong Photo\n- Banner image\n- Toàn bộ thư mục photo\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
                 return;
             }
         } else {
             // Show SweetAlert confirmation dialog
             Swal.fire({
-                title: 'Xác nhận xóa Gallery',
+                title: 'Xác nhận xóa Photo',
                 html: `
                     <div style="text-align: left; margin: 20px 0;">
-                        <p><strong>Bạn có chắc chắn muốn xóa gallery "${galleryTitle}"?</strong></p>
+                        <p><strong>Bạn có chắc chắn muốn xóa photo "${galleryTitle}"?</strong></p>
                         <br>
                         <p>Hành động này sẽ xóa:</p>
                         <ul style="margin-left: 20px;">
-                            <li>Tất cả ảnh trong gallery</li>
+                            <li>Tất cả ảnh trong photo</li>
                             <li>Banner image</li>
-                            <li>Toàn bộ thư mục gallery</li>
+                            <li>Toàn bộ thư mục photo</li>
                         </ul>
                         <br>
                         <p style="color: #dc3545; font-weight: bold;">⚠️ Hành động này KHÔNG THỂ HOÀN TÁC!</p>
@@ -367,7 +367,7 @@
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545',
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Xóa Gallery',
+                confirmButtonText: 'Xóa Photo',
                 cancelButtonText: 'Hủy',
                 reverseButtons: true,
                 focusCancel: true
@@ -398,7 +398,7 @@
         }
 
         $.ajax({
-            url: '@Url.Action("DeleteGallery", "Gallery")',
+            url: '@Url.Action("DeleteGallery", "Photo")',
             type: 'POST',
             data: { id: galleryId },
             success: function (result) {
@@ -413,12 +413,12 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Thành công!',
-                            text: `Gallery "${galleryTitle}" đã được xóa thành công!`,
+                            text: `Photo "${galleryTitle}" đã được xóa thành công!`,
                             icon: 'success',
                             confirmButtonText: 'OK'
                         });
                     } else {
-                        alert(`Gallery "${galleryTitle}" đã được xóa thành công!`);
+                        alert(`Photo "${galleryTitle}" đã được xóa thành công!`);
                     }
 
                     // Update load more button visibility after deletion
@@ -427,26 +427,26 @@
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
                             title: 'Lỗi!',
-                            text: `Lỗi khi xóa gallery: ${result.error || 'Unknown error'}`,
+                            text: `Lỗi khi xóa photo: ${result.error || 'Unknown error'}`,
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
                     } else {
-                        alert(`Lỗi khi xóa gallery: ${result.error || 'Unknown error'}`);
+                        alert(`Lỗi khi xóa photo: ${result.error || 'Unknown error'}`);
                     }
                 }
             },
             error: function (xhr, status, error) {
-                console.error('Error deleting gallery:', error);
+                console.error('Error deleting photo:', error);
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: 'Lỗi!',
-                        text: 'Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.',
+                        text: 'Có lỗi xảy ra khi xóa photo. Vui lòng thử lại.',
                         icon: 'error',
                         confirmButtonText: 'OK'
                     });
                 } else {
-                    alert('Có lỗi xảy ra khi xóa gallery. Vui lòng thử lại.');
+                    alert('Có lỗi xảy ra khi xóa photo. Vui lòng thử lại.');
                 }
             }
         });

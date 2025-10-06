@@ -384,7 +384,7 @@ namespace NguyenTienLinh.Controllers
                 // Check if title already exists
                 if (await _galleryRepo.IsTitleExistsAsync(request.Title.Trim()))
                 {
-                    return BadRequest(new { success = false, message = "Tiêu đề gallery đã tồn tại. Vui lòng chọn tiêu đề khác." });
+                    return BadRequest(new { success = false, message = "Tiêu đề photo đã tồn tại. Vui lòng chọn tiêu đề khác." });
                 }
 
                 // Step 1: Create gallery first
@@ -476,7 +476,7 @@ namespace NguyenTienLinh.Controllers
                 // Check if title already exists (excluding current gallery)
                 if (await _galleryRepo.IsTitleExistsAsync(request.Title.Trim(), id))
                 {
-                    return BadRequest(new { success = false, message = "Tiêu đề gallery đã tồn tại. Vui lòng chọn tiêu đề khác." });
+                    return BadRequest(new { success = false, message = "Tiêu đề photo đã tồn tại. Vui lòng chọn tiêu đề khác." });
                 }
 
                 var uploadedFiles = new List<string>();
