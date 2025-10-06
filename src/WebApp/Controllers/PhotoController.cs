@@ -5,13 +5,13 @@ using WebApp.Models;
 namespace WebApp.Controllers
 {
 
-    public class GalleryController : Controller
+    public class PhotoController : Controller
     {
-        private readonly ILogger<GalleryController> _logger;
+        private readonly ILogger<PhotoController> _logger;
         private readonly IConfiguration _configuration;
         private readonly System.Text.Json.JsonSerializerOptions _jsonOptions;
 
-        public GalleryController(ILogger<GalleryController> logger, IConfiguration configuration)
+        public PhotoController(ILogger<PhotoController> logger, IConfiguration configuration)
         {
             _logger = logger;
             _configuration = configuration;
@@ -51,13 +51,13 @@ namespace WebApp.Controllers
                 }
                 else
                 {
-                    _logger.LogError("Failed to load galleries: {StatusCode} - {Content}", response.StatusCode, jsonContent);
+                    _logger.LogError("Failed to load Photos: {StatusCode} - {Content}", response.StatusCode, jsonContent);
                     return View(new List<GalleryDTO>());
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading galleries in Index action");
+                _logger.LogError(ex, "Error loading Photos in Index action");
                 return View(new List<GalleryDTO>());
             }
         }
@@ -85,8 +85,8 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading galleries");
-                return Json(new { error = "Failed to load galleries" });
+                _logger.LogError(ex, "Error loading Photos");
+                return Json(new { error = "Failed to load Photos" });
             }
 
             return Json(new { error = "No data found" });
@@ -115,8 +115,8 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting gallery {Id}", id);
-                return Json(new { success = false, error = "Failed to delete gallery" });
+                _logger.LogError(ex, "Error deleting Photos {Id}", id);
+                return Json(new { success = false, error = "Failed to delete Photos" });
             }
         }
 
@@ -165,7 +165,7 @@ namespace WebApp.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating gallery with files");
-                return Json(new { success = false, error = "Failed to create gallery" });
+                return Json(new { success = false, error = "Failed to create Photos" });
             }
         }
 
@@ -213,93 +213,11 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating gallery with changes {Id}", id);
-                return Json(new { success = false, error = "Failed to update gallery" });
+                _logger.LogError(ex, "Error updating photo with changes {Id}", id);
+                return Json(new { success = false, error = "Failed to update photo" });
             }
         }
-
-
-
-        [HttpPost]
-        public IActionResult CreateGallery(GalleryDTO galleryDTO)
-        {
-            var getCurrentUser = HttpContext.Session.GetString("currentUser");
-            if (!string.IsNullOrEmpty(getCurrentUser))
-            {
-                TempData["currentUser"] = getCurrentUser;
-            }
-
-            var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery";
-
-            try
-            {
-                var response = client.PostAsJsonAsync(requestURL, galleryDTO).Result;
-
-                string requestGetURL = $"{apiUrl}/api/Gallery";
-                var galleries = client.GetFromJsonAsync<List<GalleryDTO>>(requestGetURL).Result ?? new List<GalleryDTO>();
-
-                if (response.StatusCode != System.Net.HttpStatusCode.Created)
-                {
-                    ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                        "Tạo gallery thất bại", SweetAlertMessageType.error);
-                    return View("Manage", galleries);
-                }
-
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Tạo gallery thành công", SweetAlertMessageType.success);
-                return View("Manage", galleries);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating gallery");
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Tạo gallery thất bại", SweetAlertMessageType.error);
-                return RedirectToAction("Manage");
-            }
-        }
-
-        [HttpPost]
-        public IActionResult UpdateGallery(GalleryDTO galleryDTO)
-        {
-            var getCurrentUser = HttpContext.Session.GetString("currentUser");
-            if (!string.IsNullOrEmpty(getCurrentUser))
-            {
-                TempData["currentUser"] = getCurrentUser;
-            }
-
-            var apiUrl = _configuration["AppSettings:ApiUrl"];
-            HttpClient client = new HttpClient();
-            string requestURL = $"{apiUrl}/api/Gallery/{galleryDTO.IdGallery}";
-
-            try
-            {
-                var response = client.PutAsJsonAsync(requestURL, galleryDTO).Result;
-
-                string requestGetURL = $"{apiUrl}/api/Gallery";
-                var galleries = client.GetFromJsonAsync<List<GalleryDTO>>(requestGetURL).Result ?? new List<GalleryDTO>();
-
-                if (response.StatusCode != System.Net.HttpStatusCode.OK)
-                {
-                    ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                        "Cập nhật gallery thất bại", SweetAlertMessageType.error);
-                    return View("Manage", galleries);
-                }
-
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Cập nhật gallery thành công", SweetAlertMessageType.success);
-                return View("Manage", galleries);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating gallery");
-                ViewBag.SweetAlertShowMessage = SweetAlertHelper.ShowMessage("Thông báo",
-                    "Cập nhật gallery thất bại", SweetAlertMessageType.error);
-                return RedirectToAction("Manage");
-            }
-        }
-
+        
 
         public IActionResult Manager(int? id)
         {
@@ -320,7 +238,7 @@ namespace WebApp.Controllers
                 var newGallery = new GalleryDTO
                 {
                     IdGallery = 0,
-                    Title = "Gallery Mới",
+                    Title = "Photo Mới",
                     CreatedDate = DateTime.Now,
                     BannerImagePath = "",
                     BannerImageName = "",
@@ -345,7 +263,7 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching gallery for management");
+                _logger.LogError(ex, "Error fetching photo for management");
                 return NotFound();
             }
         }

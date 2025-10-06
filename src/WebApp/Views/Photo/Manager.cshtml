@@ -99,20 +99,6 @@
 </script>
 <link rel="stylesheet" href="~/css/gallery-manager.css" />
 
-<!-- Breadcrumb Navigation -->
-<nav aria-label="Breadcrumb" class="breadcrumb-nav">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="/" aria-label="Home">Trang chủ</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="/Gallery" aria-label="Gallery List">Thư viện ảnh</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-            @Model.Title
-        </li>
-    </ol>
-</nav>
 
 
 <div class="hero-banner" id="heroBanner" role="banner">
@@ -130,7 +116,7 @@
                 @if (isLoggedIn)
                 {
                     <input type="text" id="galleryTitleInput" class="gallery-title-input" value="@Model.Title"
-                        placeholder="Nhập tên Gallery" style="display: none;">
+                        placeholder="Nhập tên Photo" style="display: none;">
                     <button class="edit-title-btn" onclick="toggleTitleEdit()" title="Chỉnh sửa tên">✏️</button>
                 }
             </div>
@@ -140,7 +126,7 @@
                     <div class="gallery-url-display">
                         <span class="url-label">URL:</span>
                         <span class="url-value"
-                            id="galleryUrlDisplay">@(Context.Request.Scheme)://@(Context.Request.Host)@("/Gallery")@(Model.Url)</span>
+                            id="galleryUrlDisplay">@(Context.Request.Scheme)://@(Context.Request.Host)@("/Photo")@(Model.Url)</span>
                     </div>
                 </div>
             }
@@ -158,18 +144,18 @@
                         CHỌN ẢNH BANNER
                     </button>
                     <button class="hero-action-btn" id="saveGalleryBtn" onclick="saveGallery()">
-                        @(Model.IdGallery == 0 ? "TẠO GALLERY" : "LƯU GALLERY")
+                        @(Model.IdGallery == 0 ? "TẠO PHOTO" : "LƯU PHOTO")
                     </button>
                     @if (Model.IdGallery == 0)
                     {
-                        <button class="hero-action-btn secondary" onclick="window.location.href='/Gallery'">
+                        <button class="hero-action-btn secondary" onclick="window.location.href='/Photo'">
                             HỦY
                         </button>
                     }
                 </div>
             }
             <div class="view-gallery-link">
-                <a href="#" class="view-gallery-text" id="viewGalleryLink">View Gallery</a>
+                <a href="#" class="view-gallery-text" id="viewGalleryLink">View Photo</a>
             </div>
         </div>
     </div>
@@ -194,11 +180,6 @@
                 </div>
             </div>
             <div class="preview-grid" id="previewGrid"></div>
-            <center>
-                <button class="add-photos-btn" id="addPhotosBtn" style="display: none;">
-                    Thêm vào Gallery
-                </button>
-            </center>
         </div>
     </div>
 
@@ -371,7 +352,6 @@
     const previewSection = document.getElementById('previewSection');
     const previewGrid = document.getElementById('previewGrid');
     const previewCount = document.getElementById('previewCount');
-    const addPhotosBtn = document.getElementById('addPhotosBtn');
     const processingIndicator = document.getElementById('processingIndicator');
     const gallery = document.getElementById('gallery');
     const photoCount = document.getElementById('photoCount');
@@ -574,7 +554,6 @@
         previewMetadata = [];
         previewGrid.innerHTML = '';
         previewSection.style.display = 'block';
-        addPhotosBtn.style.display = 'none';
         processingIndicator.style.display = 'flex';
 
         let processedCount = 0;
@@ -586,7 +565,7 @@
             // Re-enable save button
             if (saveBtn) {
                 saveBtn.disabled = false;
-                saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO GALLERY' : 'LƯU GALLERY';
+                saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO PHOTO' : 'LƯU PHOTO';
             }
             return;
         }
@@ -609,7 +588,7 @@
                     // Re-enable save button
                     if (saveBtn) {
                         saveBtn.disabled = false;
-                        saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO GALLERY' : 'LƯU GALLERY';
+                        saveBtn.textContent = @Model.IdGallery == 0 ? 'TẠO PHOTO' : 'LƯU PHOTO';
                     }
                 }
             });
@@ -780,12 +759,6 @@
         setTimeout(() => {
             gallery.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
-    }
-
-    if (addPhotosBtn) {
-        addPhotosBtn.addEventListener('click', () => {
-            addPhotosToGallery();
-        });
     }
 
     // ============= GALLERY MANAGEMENT =============
@@ -1243,7 +1216,7 @@
                 // Use Web Share API if available
                 if (navigator.share) {
                     navigator.share({
-                        title: 'Photo from Gallery',
+                        title: 'Photo from Photos',
                         text: 'Check out this photo!',
                         url: link
                     });
@@ -1267,7 +1240,7 @@
                 const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
 
                 await navigator.share({
-                    title: 'Photo from Gallery',
+                    title: 'Photo from Photos',
                     text: 'Check out this photo!',
                     files: [file]
                 });
@@ -1440,12 +1413,12 @@
         const originalText = saveBtn.textContent;
 
         if (photos.length === 0) {
-            Swal.fire('Thông báo', 'Vui lòng thêm ít nhất 1 ảnh vào Gallery!', 'warning');
+            Swal.fire('Thông báo', 'Vui lòng thêm ít nhất 1 ảnh vào Photo!', 'warning');
             return;
         }
 
         if (@Model.IdGallery == 0 && !bannerFile) {
-            Swal.fire('Thông báo', 'Vui lòng chọn ảnh bìa cho Gallery!', 'warning');
+            Swal.fire('Thông báo', 'Vui lòng chọn ảnh bìa cho Photo!', 'warning');
             return;
         }
 
@@ -1467,21 +1440,21 @@
             });
 
             $.ajax({
-                url: '@Url.Action("CreateGalleryWithFiles", "Gallery")',
+                url: '@Url.Action("CreateGalleryWithFiles", "Photo")',
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
                 success: function(result) {
                     if (result.success) {
-                        window.location.href = `/Gallery/Manager/${result.galleryId}`;
+                        window.location.href = `/Photo/Manager/${result.galleryId}`;
                     } else {
-                        Swal.fire('Lỗi', result.message || 'Failed to create gallery', 'error');
+                        Swal.fire('Lỗi', result.message || 'Failed to create photo', 'error');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Save gallery error:', error);
-                    Swal.fire('Lỗi', 'Có lỗi xảy ra khi lưu Gallery. Vui lòng thử lại.', 'error');
+                    console.error('Save photo error:', error);
+                    Swal.fire('Lỗi', 'Có lỗi xảy ra khi lưu Photo. Vui lòng thử lại.', 'error');
                 },
                 complete: function() {
                     saveBtn.disabled = false;
@@ -1512,7 +1485,7 @@
             });
 
             $.ajax({
-                url: '@Url.Action("UpdateGalleryWithChanges", "Gallery", new { id = Model.IdGallery })',
+                url: '@Url.Action("UpdateGalleryWithChanges", "Photo", new { id = Model.IdGallery })',
                 type: 'PUT',
                 data: formData,
                 processData: false,
@@ -1522,12 +1495,12 @@
                         resetChanges();
                         window.location.reload();
                     } else {
-                        Swal.fire('Lỗi', result.message || 'Failed to update gallery', 'error');
+                        Swal.fire('Lỗi', result.message || 'Failed to update Photo', 'error');
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Save gallery error:', error);
-                    Swal.fire('Lỗi', 'Có lỗi xảy ra khi lưu Gallery. Vui lòng thử lại.', 'error');
+                    Swal.fire('Lỗi', 'Có lỗi xảy ra khi lưu Photo. Vui lòng thử lại.', 'error');
                 },
                 complete: function() {
                     saveBtn.disabled = false;
