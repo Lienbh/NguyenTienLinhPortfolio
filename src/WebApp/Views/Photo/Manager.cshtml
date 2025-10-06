@@ -1464,24 +1464,24 @@
         } else {
             detectReorderChanges();
 
-            changes.added.forEach((add) => {
+            changes.added.forEach((add, index) => {
                 formData.append('PhotosToAdd', add.file);
-                formData.append('PhotosToAddDisplayOrder', add.displayOrder);
+                formData.append(`PhotosToAddDisplayOrder[${index}]`, add.displayOrder.toString());
             });
 
-            changes.updated.forEach((update) => {
+            changes.updated.forEach((update, index) => {
                 formData.append('PhotosToUpdate', update.newFile);
-                formData.append('PhotosToUpdatePhotoId', update.photoId);
-                formData.append('PhotosToUpdateDisplayOrder', update.displayOrder);
+                formData.append(`PhotosToUpdatePhotoId[${index}]`, update.photoId.toString());
+                formData.append(`PhotosToUpdateDisplayOrder[${index}]`, update.displayOrder.toString());
             });
 
-            changes.deleted.forEach((photoId) => {
-                formData.append('PhotosToDelete', photoId);
+            changes.deleted.forEach((photoId, index) => {
+                formData.append(`PhotosToDelete[${index}]`, photoId.toString());
             });
 
-            changes.reordered.forEach((reorder) => {
-                formData.append('PhotosToReorderPhotoId', reorder.photoId);
-                formData.append('PhotosToReorderNewOrder', reorder.newOrder);
+            changes.reordered.forEach((reorder, index) => {
+                formData.append(`PhotosToReorderPhotoId[${index}]`, reorder.photoId.toString());
+                formData.append(`PhotosToReorderNewOrder[${index}]`, reorder.newOrder.toString());
             });
 
             $.ajax({
