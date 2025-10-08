@@ -24,6 +24,9 @@ namespace NguyenTienLinh.Models
         [StringLength(200)]
         public string? BannerImageName { get; set; }
 
+        // Display order for sorting
+        public int DisplayOrder { get; set; } = 0;
+
         // Navigation properties
         public virtual ICollection<GalleryItem> GalleryItems { get; set; } = new List<GalleryItem>();
     }

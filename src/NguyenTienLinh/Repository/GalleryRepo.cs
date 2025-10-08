@@ -20,7 +20,8 @@ namespace NguyenTienLinh.Repository
         {
             var galleries = await _context.Galleries
                 .Include(g => g.GalleryItems)
-                .OrderByDescending(g => g.CreatedDate)
+                .OrderBy(g => g.DisplayOrder)
+                .ThenByDescending(g => g.CreatedDate)
                 .ToListAsync();
 
             return galleries.Select(g => new GalleryDTO
@@ -29,6 +30,7 @@ namespace NguyenTienLinh.Repository
                 Title = g.Title,
                 Url = g.Url,
                 CreatedDate = g.CreatedDate,
+                DisplayOrder = g.DisplayOrder,
                 GalleryItems = g.GalleryItems.Select(gi => new GalleryItemDTO
                 {
                     IdGalleryItem = gi.IdGalleryItem,
@@ -59,7 +61,8 @@ namespace NguyenTienLinh.Repository
 
             // Apply pagination and ordering
             var galleries = await query
-                .OrderByDescending(g => g.CreatedDate)
+                .OrderBy(g => g.DisplayOrder)
+                .ThenByDescending(g => g.CreatedDate)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -70,6 +73,7 @@ namespace NguyenTienLinh.Repository
                 Title = g.Title,
                 Url = g.Url,
                 CreatedDate = g.CreatedDate,
+                DisplayOrder = g.DisplayOrder,
                 GalleryItems = g.GalleryItems.Select(gi => new GalleryItemDTO
                 {
                     IdGalleryItem = gi.IdGalleryItem,
@@ -107,6 +111,7 @@ namespace NguyenTienLinh.Repository
                 Title = gallery.Title,
                 Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
+                DisplayOrder = gallery.DisplayOrder,
                 GalleryItems = gallery.GalleryItems.Select(gi => new GalleryItemDTO
                 {
                     IdGalleryItem = gi.IdGalleryItem,
@@ -123,12 +128,20 @@ namespace NguyenTienLinh.Repository
 
         public async Task<GalleryDTO> CreateGalleryAsync(GalleryDTO galleryDTO)
         {
+            // Auto-assign DisplayOrder if not provided
+            if (galleryDTO.DisplayOrder == 0)
+            {
+                var maxOrder = await _context.Galleries.MaxAsync(g => (int?)g.DisplayOrder) ?? 0;
+                galleryDTO.DisplayOrder = maxOrder + 1;
+            }
+
             var gallery = new Gallery
             {
                 Title = galleryDTO.Title,
                 Url = galleryDTO.Url,
                 BannerImagePath = galleryDTO.BannerImagePath,
-                BannerImageName = galleryDTO.BannerImageName
+                BannerImageName = galleryDTO.BannerImageName,
+                DisplayOrder = galleryDTO.DisplayOrder
             };
 
             _context.Galleries.Add(gallery);
@@ -140,6 +153,7 @@ namespace NguyenTienLinh.Repository
                 Title = gallery.Title,
                 Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
+                DisplayOrder = gallery.DisplayOrder,
                 BannerImagePath = gallery.BannerImagePath,
                 BannerImageName = gallery.BannerImageName,
                 GalleryItems = new List<GalleryItemDTO>()
@@ -155,6 +169,7 @@ namespace NguyenTienLinh.Repository
             gallery.Url = galleryDTO.Url;
             gallery.BannerImagePath = galleryDTO.BannerImagePath;
             gallery.BannerImageName = galleryDTO.BannerImageName;
+            gallery.DisplayOrder = galleryDTO.DisplayOrder;
 
             await _context.SaveChangesAsync();
 
@@ -164,6 +179,7 @@ namespace NguyenTienLinh.Repository
                 Title = gallery.Title,
                 Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
+                DisplayOrder = gallery.DisplayOrder,
                 BannerImagePath = gallery.BannerImagePath,
                 BannerImageName = gallery.BannerImageName,
                 GalleryItems = gallery.GalleryItems.Select(gi => new GalleryItemDTO
@@ -541,6 +557,7 @@ namespace NguyenTienLinh.Repository
                 Title = gallery.Title,
                 Url = gallery.Url,
                 CreatedDate = gallery.CreatedDate,
+                DisplayOrder = gallery.DisplayOrder,
                 BannerImagePath = gallery.BannerImagePath,
                 BannerImageName = gallery.BannerImageName,
                 GalleryItems = gallery.GalleryItems
@@ -568,6 +585,79 @@ namespace NguyenTienLinh.Repository
             }
 
             return await query.AnyAsync();
+        }
+
+        // Gallery Position Management
+        public async Task<bool> UpdateGalleryPositionAsync(int galleryId, int newPosition)
+        {
+            try
+            {
+                var gallery = await _context.Galleries.FindAsync(galleryId);
+                if (gallery == null) return false;
+
+                // Get all galleries, ordered by current DisplayOrder
+                var allGalleries = await _context.Galleries
+                    .OrderBy(g => g.DisplayOrder)
+                    .ToListAsync();
+
+                // Find the gallery to move
+                var galleryToMove = allGalleries.FirstOrDefault(g => g.IdGallery == galleryId);
+                if (galleryToMove == null) return false;
+
+                // Get current position (0-based)
+                var currentPosition = allGalleries.IndexOf(galleryToMove);
+                var targetPosition = newPosition - 1; // Convert to 0-based
+
+                Console.WriteLine($"Moving gallery {galleryId} from position {currentPosition + 1} to position {newPosition}");
+
+                // Remove the gallery from its current position
+                allGalleries.Remove(galleryToMove);
+
+                // Insert it at the new position
+                var insertIndex = Math.Max(0, Math.Min(targetPosition, allGalleries.Count));
+                allGalleries.Insert(insertIndex, galleryToMove);
+
+                // Update DisplayOrder for ALL galleries to reflect new positions
+                for (int i = 0; i < allGalleries.Count; i++)
+                {
+                    var oldOrder = allGalleries[i].DisplayOrder;
+                    allGalleries[i].DisplayOrder = i + 1;
+                    Console.WriteLine($"Gallery {allGalleries[i].IdGallery}: {oldOrder} → {i + 1}");
+                }
+
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"Successfully updated {allGalleries.Count} galleries");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating gallery position: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> ReorderGalleriesAsync(List<int> galleryIds)
+        {
+            try
+            {
+                var galleries = await _context.Galleries.ToListAsync();
+
+                for (int i = 0; i < galleryIds.Count; i++)
+                {
+                    var gallery = galleries.FirstOrDefault(g => g.IdGallery == galleryIds[i]);
+                    if (gallery != null)
+                    {
+                        gallery.DisplayOrder = i + 1;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -10,6 +10,9 @@ namespace BuildingBlock.DTOS
         public string? BannerImagePath { get; set; }
         public string? BannerImageName { get; set; }
 
+        // Display order for sorting
+        public int DisplayOrder { get; set; } = 0;
+
         public List<GalleryItemDTO> GalleryItems { get; set; } = new List<GalleryItemDTO>();
     }
 }

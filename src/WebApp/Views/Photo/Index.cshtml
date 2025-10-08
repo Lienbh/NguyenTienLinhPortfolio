@@ -38,7 +38,11 @@
         {
             @foreach (var gallery in Model)
             {
-                <div class="gallery-item" data-gallery-id="@gallery.IdGallery">
+                <div class="gallery-item" data-gallery-id="@gallery.IdGallery" draggable="@(isLoggedIn ? "true" : "false")">
+                    @if (isLoggedIn)
+                    {
+                        <button class="drag-handle" title="Kéo để sắp xếp lại">⋮⋮</button>
+                    }
                     <div class="gallery-banner">
                         @if (!string.IsNullOrEmpty(gallery.BannerImagePath))
                         {
@@ -103,6 +107,16 @@
 <div id="endOfResults" class="end-of-results" style="display: none;">
     <span>You've reached the end of the Photo collection</span>
 </div>
+
+<!-- Mobile Reorder Controls - Only for small mobile screens -->
+@if (isLoggedIn)
+{
+    <div id="mobileReorderControls" class="mobile-reorder-controls" style="display: none;">
+        <button id="moveUpBtn" class="mobile-reorder-btn" title="Di chuyển lên">↑</button>
+        <button id="moveDownBtn" class="mobile-reorder-btn" title="Di chuyển xuống">↓</button>
+        <button id="cancelReorderBtn" class="mobile-reorder-btn" title="Hủy">✕</button>
+    </div>
+}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Load More Button and Search functionality
@@ -143,6 +157,9 @@
             endOfResults.style.display = 'none';
         }
 
+        // Hide mobile reorder controls
+        hideMobileReorderControls();
+
         // Update UI
         updateSearchUI();
 
@@ -173,6 +190,9 @@
         if (endOfResults) {
             endOfResults.style.display = 'none';
         }
+
+        // Hide mobile reorder controls
+        hideMobileReorderControls();
 
         // Update UI
         updateSearchUI();
@@ -261,10 +281,12 @@
         const galleryItem = document.createElement('div');
         galleryItem.className = 'gallery-item';
         galleryItem.setAttribute('data-gallery-id', gallery.idGallery);
+        galleryItem.setAttribute('draggable', isLoggedIn ? 'true' : 'false');
 
         const isLoggedIn = @isLoggedIn.ToString().ToLower();
 
         galleryItem.innerHTML = `
+            ${isLoggedIn ? '<button class="drag-handle" title="Kéo để sắp xếp lại">⋮⋮</button>' : ''}
             <div class="gallery-banner">
                 ${gallery.bannerImagePath ?
                 `<img src="${cdnUrl}/assets/gallery/${gallery.idGallery}/${gallery.bannerImagePath}" alt="${gallery.title}" class="banner-img">` :
@@ -296,6 +318,194 @@
         `;
 
         galleryGrid.appendChild(galleryItem);
+
+        // Initialize drag and drop for new item if logged in
+        if (isLoggedIn) {
+            initializeDragAndDropForItem(galleryItem);
+        }
+    }
+
+    function initializeDragAndDropForItem(item) {
+        if (!@isLoggedIn.ToString().ToLower()) return;
+
+        if (isMobile && isSmallScreen) {
+            // Mobile phone - use mobile controls only
+            item.addEventListener('click', handleMobileClick);
+        } else {
+            // Desktop/Tablet - use drag & drop
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+
+            // Drop events
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('dragenter', handleDragEnter);
+            item.addEventListener('dragleave', handleDragLeave);
+            item.addEventListener('drop', handleDrop);
+
+            // Also add touch events for tablets
+            if (isTablet || window.innerWidth > 768) {
+                item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                item.addEventListener('touchend', handleTouchEnd, { passive: false });
+            }
+        }
+    }
+
+    // Mobile touch event handlers
+    function handleTouchStart(e) {
+        const touch = e.touches[0];
+        touchStartY = touch.clientY;
+        touchStartX = touch.clientX;
+
+        const item = e.target.closest('.gallery-item');
+        if (item) {
+            selectedElement = item;
+        }
+    }
+
+    function handleTouchMove(e) {
+        if (!selectedElement) return;
+
+        const touch = e.touches[0];
+        const deltaY = Math.abs(touch.clientY - touchStartY);
+        const deltaX = Math.abs(touch.clientX - touchStartX);
+
+        // If vertical movement is significant, prevent default scrolling
+        if (deltaY > 10 && deltaY > deltaX) {
+            e.preventDefault();
+            selectedElement.classList.add('touch-dragging');
+        }
+    }
+
+    function handleTouchEnd(e) {
+        if (selectedElement) {
+            selectedElement.classList.remove('touch-dragging');
+            selectedElement = null;
+        }
+    }
+
+    function handleMobileClick(e) {
+        console.log('Mobile click detected', e.target);
+
+        // Prevent click if it was part of a drag gesture
+        if (selectedElement) {
+            e.preventDefault();
+            return;
+        }
+
+        const item = e.target.closest('.gallery-item');
+        const dragHandle = e.target.closest('.drag-handle');
+
+        console.log('Item:', item, 'DragHandle:', dragHandle);
+
+        if (item && dragHandle) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Showing mobile reorder controls');
+            // Show mobile reorder controls
+            showMobileReorderControls(item);
+        } else if (item && !dragHandle) {
+            // If clicking on gallery item but not on drag handle, hide controls
+            console.log('Hiding mobile reorder controls');
+            hideMobileReorderControls();
+        }
+    }
+
+    function showMobileReorderControls(item) {
+        console.log('showMobileReorderControls called', item);
+        selectedElement = item;
+        const controls = document.getElementById('mobileReorderControls');
+        console.log('Controls element:', controls);
+
+        if (controls) {
+            controls.classList.add('show');
+            controls.style.display = 'flex';
+            console.log('Controls should be visible now');
+
+            // Update button states
+            const moveUpBtn = document.getElementById('moveUpBtn');
+            const moveDownBtn = document.getElementById('moveDownBtn');
+
+            const currentIndex = Array.from(galleryGrid.children).indexOf(item);
+            if (moveUpBtn) moveUpBtn.disabled = currentIndex === 0;
+            if (moveDownBtn) moveDownBtn.disabled = currentIndex === galleryGrid.children.length - 1;
+
+            // Highlight selected item
+            item.style.border = '2px solid #bbd2c5';
+            item.style.transform = 'scale(1.02)';
+        } else {
+            console.error('Mobile reorder controls not found!');
+        }
+    }
+
+    function hideMobileReorderControls() {
+        const controls = document.getElementById('mobileReorderControls');
+        if (controls) {
+            controls.classList.remove('show');
+        }
+
+        if (selectedElement) {
+            selectedElement.style.border = '';
+            selectedElement.style.transform = '';
+            selectedElement = null;
+        }
+    }
+
+    // Mobile reorder button handlers
+    function setupMobileReorderButtons() {
+        const moveUpBtn = document.getElementById('moveUpBtn');
+        const moveDownBtn = document.getElementById('moveDownBtn');
+        const cancelBtn = document.getElementById('cancelReorderBtn');
+
+        if (moveUpBtn) {
+            moveUpBtn.addEventListener('click', () => {
+                if (selectedElement) {
+                    moveItemUp(selectedElement);
+                }
+            });
+        }
+
+        if (moveDownBtn) {
+            moveDownBtn.addEventListener('click', () => {
+                if (selectedElement) {
+                    moveItemDown(selectedElement);
+                }
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', hideMobileReorderControls);
+        }
+    }
+
+    function moveItemUp(item) {
+        const currentIndex = Array.from(galleryGrid.children).indexOf(item);
+        if (currentIndex > 0) {
+            const prevItem = galleryGrid.children[currentIndex - 1];
+            galleryGrid.insertBefore(item, prevItem);
+            updateGalleryOrder();
+
+            // Update button states
+            const moveUpBtn = document.getElementById('moveUpBtn');
+            const moveDownBtn = document.getElementById('moveDownBtn');
+            moveUpBtn.disabled = currentIndex - 1 === 0;
+            moveDownBtn.disabled = false;
+        }
+    }
+
+    function moveItemDown(item) {
+        const currentIndex = Array.from(galleryGrid.children).indexOf(item);
+        if (currentIndex < galleryGrid.children.length - 1) {
+            const nextItem = galleryGrid.children[currentIndex + 1];
+            galleryGrid.insertBefore(item, nextItem.nextSibling);
+            updateGalleryOrder();
+
+            // Update button states
+            const moveUpBtn = document.getElementById('moveUpBtn');
+            const moveDownBtn = document.getElementById('moveDownBtn');
+            moveUpBtn.disabled = false;
+            moveDownBtn.disabled = currentIndex + 1 === galleryGrid.children.length - 1;
+        }
     }
 
     // Show empty state
@@ -491,8 +701,176 @@
         });
     }
 
+    // Drag & Drop functionality
+    let draggedElement = null;
+    let draggedIndex = -1;
+    let selectedElement = null;
+    let isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let isTablet = /iPad/i.test(navigator.userAgent);
+    let isSmallScreen = window.innerWidth <= 768;
+    let touchStartY = 0;
+    let touchStartX = 0;
+
+    function initializeDragAndDrop() {
+        if (!@isLoggedIn.ToString().ToLower()) return;
+
+        const galleryItems = document.querySelectorAll('.gallery-item[draggable="true"]');
+
+        galleryItems.forEach((item, index) => {
+            if (isMobile && isSmallScreen) {
+                // Mobile phone - use mobile controls only
+                item.addEventListener('click', handleMobileClick);
+            } else {
+                // Desktop/Tablet - use drag & drop
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+
+                // Drop events
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+                item.addEventListener('drop', handleDrop);
+
+                // Also add touch events for tablets
+                if (isTablet || window.innerWidth > 768) {
+                    item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                    item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                    item.addEventListener('touchend', handleTouchEnd, { passive: false });
+                }
+            }
+        });
+    }
+
+    function handleDragStart(e) {
+        draggedElement = e.target;
+        draggedIndex = Array.from(galleryGrid.children).indexOf(draggedElement);
+        draggedElement.classList.add('dragging');
+
+        // Set drag data
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', draggedElement.outerHTML);
+    }
+
+    function handleDragEnd(e) {
+        draggedElement.classList.remove('dragging');
+
+        // Remove drag-over classes from all items
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.classList.remove('drag-over', 'drag-placeholder');
+        });
+
+        draggedElement = null;
+        draggedIndex = -1;
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        if (e.target.classList.contains('gallery-item') && e.target !== draggedElement) {
+            e.target.classList.add('drag-over');
+        }
+    }
+
+    function handleDragLeave(e) {
+        if (e.target.classList.contains('gallery-item')) {
+            e.target.classList.remove('drag-over');
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+
+        const dropTarget = e.target.closest('.gallery-item');
+        if (!dropTarget || dropTarget === draggedElement) return;
+
+        const dropIndex = Array.from(galleryGrid.children).indexOf(dropTarget);
+
+        // Remove drag classes
+        dropTarget.classList.remove('drag-over');
+        draggedElement.classList.remove('dragging');
+
+        // Reorder elements
+        if (draggedIndex < dropIndex) {
+            galleryGrid.insertBefore(draggedElement, dropTarget.nextSibling);
+        } else {
+            galleryGrid.insertBefore(draggedElement, dropTarget);
+        }
+
+        // Update positions on server
+        updateGalleryOrder();
+    }
+
+    function updateGalleryOrder() {
+        const galleryItems = Array.from(galleryGrid.querySelectorAll('.gallery-item'));
+        const galleryIds = galleryItems.map(item => parseInt(item.getAttribute('data-gallery-id')));
+
+        console.log('Updating gallery order:', galleryIds);
+
+        // Show loading state
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Đang cập nhật...',
+                text: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        $.ajax({
+            url: '@apiUrl/api/Gallery/reorder',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(galleryIds),
+            success: function (result) {
+                console.log('Gallery order updated successfully');
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Thành công!',
+                        text: 'Thứ tự photo đã được cập nhật!',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error updating gallery order:', error);
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: 'Có lỗi xảy ra khi cập nhật thứ tự. Vui lòng thử lại.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+
+                // Reload page to restore original order
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        });
+    }
+
     // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
+        console.log('Device detection:', {
+            isMobile: isMobile,
+            isTablet: isTablet,
+            isSmallScreen: isSmallScreen,
+            windowWidth: window.innerWidth,
+            userAgent: navigator.userAgent
+        });
+
         // Set initial state for load more functionality
         currentPage = 2; // Start from page 2 since page 1 is already loaded server-side
         hasMorePages = true;
@@ -501,5 +879,27 @@
         // Check if we need to show load more button
         // This will be determined by the server-side data
         updateLoadMoreButton();
+
+        // Initialize drag and drop
+        initializeDragAndDrop();
+
+        // Setup mobile reorder buttons only on mobile
+        if (@isLoggedIn.ToString().ToLower() && isMobile && isSmallScreen) {
+            console.log('Setting up mobile reorder buttons');
+            setupMobileReorderButtons();
+
+            // Hide mobile controls when clicking outside
+            document.addEventListener('click', (e) => {
+                const controls = document.getElementById('mobileReorderControls');
+                const isClickOnControls = controls && controls.contains(e.target);
+                const isClickOnDragHandle = e.target.closest('.drag-handle');
+
+                if (!isClickOnControls && !isClickOnDragHandle) {
+                    hideMobileReorderControls();
+                }
+            });
+        } else {
+            console.log('Not setting up mobile reorder buttons');
+        }
     });
 </script>

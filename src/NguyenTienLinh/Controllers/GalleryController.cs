@@ -784,6 +784,46 @@ namespace NguyenTienLinh.Controllers
             }
         }
 
+        // PUT: api/Gallery/{id}/position
+        [HttpPut("{id}/position")]
+        public async Task<ActionResult> UpdateGalleryPosition(int id, [FromBody] int newPosition)
+        {
+            try
+            {
+                var result = await _galleryRepo.UpdateGalleryPositionAsync(id, newPosition);
+                if (!result)
+                {
+                    return NotFound($"Gallery with ID {id} not found.");
+                }
+
+                return Ok(new { message = "Gallery position updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // POST: api/Gallery/reorder
+        [HttpPost("reorder")]
+        public async Task<ActionResult> ReorderGalleries([FromBody] List<int> galleryIds)
+        {
+            try
+            {
+                var result = await _galleryRepo.ReorderGalleriesAsync(galleryIds);
+                if (!result)
+                {
+                    return BadRequest("Failed to reorder galleries");
+                }
+
+                return Ok(new { message = "Galleries reordered successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
     }
 
     public class CreateGalleryWithFilesRequest

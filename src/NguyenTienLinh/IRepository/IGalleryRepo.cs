@@ -25,5 +25,9 @@ namespace AppApi.IRepository
         Task<GalleryItemDTO> UpdateGalleryItemAsync(int itemId, GalleryItemDTO item);
         Task<GalleryDTO?> GetGalleryByUrlAsync(string url);
         Task<bool> IsTitleExistsAsync(string title, int? excludeId = null);
+
+        // Gallery Position Management
+        Task<bool> UpdateGalleryPositionAsync(int galleryId, int newPosition);
+        Task<bool> ReorderGalleriesAsync(List<int> galleryIds);
     }
 }
