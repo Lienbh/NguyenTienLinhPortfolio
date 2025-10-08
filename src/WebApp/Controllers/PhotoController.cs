@@ -217,7 +217,7 @@ namespace WebApp.Controllers
                 return Json(new { success = false, error = "Failed to update photo" });
             }
         }
-        
+
 
         public IActionResult Manager(int? id)
         {
@@ -311,6 +311,34 @@ namespace WebApp.Controllers
             {
                 _logger.LogError(ex, "Error fetching gallery by slug: {Slug}", slug);
                 return NotFound();
+            }
+        }
+
+        // Endpoint for reordering galleries via AJAX
+        [HttpPost("ReorderGalleries")]
+        public async Task<IActionResult> ReorderGalleries([FromBody] List<int> galleryIds)
+        {
+            var apiUrl = _configuration["AppSettings:ApiUrl"];
+            HttpClient client = new HttpClient();
+            string requestURL = $"{apiUrl}/api/Gallery/reorder";
+
+            try
+            {
+                var response = await client.PostAsJsonAsync(requestURL, galleryIds);
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true, message = "Gallery order updated successfully" });
+                }
+                else
+                {
+                    var errorText = await response.Content.ReadAsStringAsync();
+                    return Json(new { success = false, error = errorText });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reordering galleries");
+                return Json(new { success = false, error = "Failed to reorder galleries" });
             }
         }
 
