@@ -59,7 +59,6 @@
                                 <h3 class="gallery-title">@gallery.Title.ToUpper()</h3>
                                 <div class="gallery-meta">
                                     <span class="photo-count">📸 @gallery.GalleryItems.Count Photos</span>
-                                    <span class="gallery-date">@gallery.CreatedDate.ToString("dd/MM/yyyy")</span>
                                 </div>
                                 <div class="gallery-actions">
                                     <a href="@(isLoggedIn ? $"/Photo/Manager/{gallery.IdGallery}" : $"/Photo/{gallery.Url?.Replace("/", "") ?? "Manager/" + gallery.IdGallery}")"
@@ -298,7 +297,6 @@
                         <h3 class="gallery-title">${gallery.title.toUpperCase()}</h3>
                         <div class="gallery-meta">
                             <span class="photo-count">📸 ${gallery.galleryItems.length} Photos</span>
-                            <span class="gallery-date">${new Date(gallery.createdDate).toLocaleDateString('vi-VN')}</span>
                         </div>
                         <div class="gallery-actions">
                             <a href="${isLoggedIn ? `/Photo/Manager/${gallery.idGallery}` : `/Photo/${gallery.url?.replace('/', '') || 'Manager/' + gallery.idGallery}`}" class="action-btn">
