@@ -30,7 +30,7 @@ body {
     text-align: center;
     position: relative;
     overflow: hidden;
-    padding: 70px 0px 0px 0px;
+    padding: 70px 0px 30px 0px;
 }
 
 .gallery-hero::before {
@@ -84,7 +84,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.2);
+    background: #ccc;
     color: white;
     padding: 15px 30px;
     border-radius: 50px;
@@ -93,15 +93,14 @@ body {
     font-size: 1.1rem;
     letter-spacing: 1px;
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid #ccc;
     transition: all 0.3s ease;
 }
 
 .hero-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     color: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     text-decoration: none;
 }
 
@@ -764,8 +763,12 @@ body {
     .gallery-container {
         padding: 0px 15px;
     }
+    .gallery-hero {
+        padding: 80px 0px 15px 0px !important;
+    
+    }
     .search-container {
-        margin: 0px !important;
+        margin: 0px 0px 30px 0px !important;
     }
 
     .hero-title {
